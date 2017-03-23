@@ -1,0 +1,453 @@
+﻿using UnityEngine;
+using System.Collections;
+using System;
+using System.IO;
+
+//シミュレーションに用いる三角形シート
+public class TriangleSheet : MonoBehaviour {
+    public GameObject forcePrefab;
+    public GameObject VertexSpherePrefab;
+    public GameObject EdgePrefab;
+    public GameObject SurfacePrefab;
+    public GameObject SurfaceObjectPrefab;
+    public int N = 10;
+    public const double SphereInterval = 50.0;
+    //頂点
+    public GameObject[] Vertices;
+    //エッジ
+    private GameObject[] Edges;
+    //面
+    private GameObject[] Surfaces;
+    //頂点にかかる力
+    private GameObject[] ForceArrows;
+    //面を貼るオブジェクト
+    public GameObject SurfaceGameObject;
+    public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
+    private Vector3 ExternalForce;
+    public bool issimulating = false;
+    public float delta;
+    private float timeCounter;
+    private bool brokenflag = false; //崩壊したかのフラグ
+    //Coroutineが複数出現しないようにするフラグ
+    bool isCoroutineRunning = false;
+
+    void Start() {
+        timeCounter = delta;
+        ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
+        InitializeGameObjects(N);
+    }
+
+    void InitializeGameObjects(int changeN) {
+        N = changeN;
+        if (Vertices != null) foreach (GameObject g in Vertices) Destroy(g);
+        if (Edges != null) foreach (GameObject g in Edges) Destroy(g);
+        if (Surfaces != null) foreach (GameObject g in Surfaces) Destroy(g);
+        if (ForceArrows != null) foreach (GameObject g in ForceArrows) Destroy(g);
+        if (SurfaceGameObject != null) Destroy(SurfaceGameObject);
+        Vertices = new GameObject[N * N];
+        Edges = new GameObject[2 * N * (N - 1) + (N - 1) * (N - 1) * 2];
+        Surfaces = new GameObject[(N - 1) * (N - 1) * 2];
+        ForceArrows = new GameObject[N * N];
+        #region MakeVertices
+        //頂点の作成
+        //(1,0) (0,1)→(1,0)(1/2,√3/2)の射交座標へ変換すると正方形が正三角形2つの平行四辺形になる
+        double basecenter = N * SphereInterval / 2.0;
+        double centerx = basecenter + basecenter / 2.0;
+        double centerz = basecenter * Math.Sqrt(3) / 2.0;
+        for (int i = 0; i < N * N; i++) {
+            int h = i / N; int w = i % N;
+            Vertices[i] = Instantiate(VertexSpherePrefab);
+            double basex = h * SphereInterval; double basey = w * SphereInterval;
+            double posx = basex + basey / 2.0;
+            double posz = basey * Math.Sqrt(3) / 2.0;
+            Vertices[i].transform.position = new Vector3((float)(posx - centerx), 0, (float)(posz - centerz));
+        }
+        #endregion
+        #region MakeEdges
+        //辺の作成 横
+        int edgecnt = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N - 1; j++) {
+                Edges[edgecnt] = Instantiate(EdgePrefab);
+                EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
+                es.sphere1 = Vertices[i * N + j];
+                es.sphere2 = Vertices[i * N + j + 1];
+                es.CalcNaturalLength();
+                es.CalcNowLength();
+                edgecnt++;
+            }
+        }
+        //辺の作成 縦
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N - 1; j++) {
+                Edges[edgecnt] = Instantiate(EdgePrefab);
+                EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
+                es.sphere1 = Vertices[j * N + i];
+                es.sphere2 = Vertices[(j + 1) * N + i];
+                es.CalcNaturalLength();
+                es.CalcNowLength();
+                edgecnt++;
+            }
+        }
+        //辺の作成 右下ナナメ
+        for (int i = 0; i < N - 1; i++) {
+            for (int j = 0; j < N - 1; j++) {
+                Edges[edgecnt] = Instantiate(EdgePrefab);
+                EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
+                es.sphere1 = Vertices[i * N + j];
+                es.sphere2 = Vertices[(i + 1) * N + (j + 1)];
+                es.CalcNaturalLength();
+                es.CalcNowLength();
+                Edges[edgecnt].gameObject.GetComponent<Renderer>().enabled = false;
+                edgecnt++;
+            }
+        }
+        //辺の作成 左下ナナメ
+        for (int i = 0; i < N - 1; i++) {
+            for (int j = 1; j < N; j++) {
+                Edges[edgecnt] = Instantiate(EdgePrefab);
+                EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
+                es.sphere1 = Vertices[i * N + j];
+                es.sphere2 = Vertices[(i + 1) * N + (j - 1)];
+                es.CalcNaturalLength();
+                es.CalcNowLength();
+                edgecnt++;
+            }
+        }
+        #endregion
+        #region MakeSurfaces
+        for (int i = 0; i < (N - 1) * (N - 1) * 2; i++) {
+            Surfaces[i] = Instantiate(SurfacePrefab);
+            SurfaceScript ss = Surfaces[i].GetComponent<SurfaceScript>();
+            if (i % 2 == 0) {
+                //(k, k+1, k+N)のtriangle
+                int tmp = i / 2;
+                int k = N * (tmp / (N - 1)) + (tmp % (N - 1));
+                ss.sphere1 = Vertices[k];
+                ss.sphere2 = Vertices[k + 1];
+                ss.sphere3 = Vertices[k + N];
+            }
+            else {
+                //(k, k+N, k+N+1)のtriangle
+                int tmp = (i - 1) / 2;
+                int k = N * (tmp / (N - 1)) + (tmp % (N - 1)) + 1;
+                ss.sphere1 = Vertices[k];
+                ss.sphere2 = Vertices[k + N - 1];
+                ss.sphere3 = Vertices[k + N];
+            }
+            ss.CalcNaturalArea();
+            ss.CalcNowArea();
+        }
+        #endregion
+        #region SetForceArrow
+        //頂点にかかる力を表す矢印
+        for (int i = 0; i < N * N; i++) {
+            ForceArrows[i] = Instantiate(forcePrefab);
+            ForceArrows[i].GetComponent<ForceArrow>().nekko = Vertices[i];
+        }
+        #endregion
+        #region SetSurfaceObject
+        //面をもつオブジェクトに座標を設定する
+        SurfaceGameObject = Instantiate(SurfaceObjectPrefab); 
+        SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
+        SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
+        SurfaceGameObject.GetComponent<SurfaceObject>().sheet = this;
+        #endregion
+    }
+    public void StartSimulate() {
+        issimulating = true;
+    }
+    public void StopSimulate() {
+        issimulating = false;
+    }
+    public void ToggleSimulate() {
+        if (issimulating) StopSimulate();
+        else StartSimulate();
+    }
+
+    public int tryChangeNValue(int changeN) {
+        //シミュレーション中なら変更不可
+        if (issimulating) return N;
+        InitializeGameObjects(changeN);
+        return changeN;
+    }
+    // Update is called once per frame
+    void Update() {
+        if (issimulating == false) return;
+        timeCounter -= Time.deltaTime;
+        if (timeCounter < 0) {
+            //シミュレーション前の座標をコピーしておく
+            Vector3[] oldposition_array = new Vector3[Vertices.Length];
+            for (int i = 0; i < oldposition_array.Length; i++) {
+                oldposition_array[i] = Vertices[i].transform.position;
+            }
+            //シミュレートを実行
+            //StartCoroutine(SpringSimulate());
+            //StartCoroutine(SpringSimulate2());
+            for(int i = 0; i < 100; i++) StartCoroutine(SpringSimulate3());
+            SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
+            //もしシミュレーション結果、値が崩壊した場合、座標をシミュレーション前の座標に戻してシミュレーションを自動停止
+            if (brokenflag) {
+                PositionReset();
+            }
+            timeCounter = delta;
+        }
+    }
+    public void UpdateExternalForce(Vector3 externalforce) {
+        if (ForceArrows[0] == null || ForceArrows[N*N-1] == null) return; //アプリケーション開始時に実行されるがまだInstantiateされてないことがある
+        ExternalForce = externalforce;
+        ForceArrows[0].GetComponent<ForceArrow>().arrowvec = ExternalForce;
+        ForceArrows[N * N - 1].GetComponent<ForceArrow>().arrowvec = -ExternalForce;
+    }
+    #region SimulationRoutine
+    private int GetEdgeIndex(int a, int b) {
+        //頂点番号aとbをつなぐedgeがedgesのどれに当たるかのインデックスを返す
+        if (a > b) {
+            int c = a;
+            a = b;
+            b = c;
+        }
+        int h = a / N; int w = a % N;
+        if (b - a == 1) {
+            //横
+            return h * (N - 1) + w;
+        } else if (b - a == N) {
+            //縦
+            return N * (N - 1) + h * N + w;
+        } else if (b - a == N + 1) {
+            //右下ナナメ
+            return N * (N - 1) * 2 + h * (N - 1) + w;
+        } else if (b - a == N - 1) {
+            //左下ナナメ
+            return N * (N - 1) * 2 + (N - 1) * (N - 1) + h * (N - 1) + w - 1;
+        }
+        return -1;
+    }
+    private int GetVertIndex(int h, int w) {
+        return h * N + w;
+    }
+    private int GetSurfaceIndex(int i, int j, int k) {
+        //頂点番号i,j,kでかこまれたtriangleがsurfacesのどれにあたるかのインデックスを返す
+        int[] ary = new int[] { i, j, k };
+        Array.Sort(ary);
+        if (N != 2) {
+            if (ary[0] + 1 == ary[1] && ary[0] + N == ary[2]) {
+                //triangle(k,k+1,k+N)
+                int h = ary[0] / N;
+                int w = ary[0] % N;
+                return 2 * ((N - 1) * h + w);
+            } else if (ary[0] + N - 1 == ary[1] && ary[1] + 1 == ary[2]) {
+                //triangle(k,k+N-1,k+N)
+                int h = ary[0] / N;
+                int w = ary[0] % N;
+                return 2 * ((N - 1) * h + w) - 1;
+            }
+        }else {
+            //N==2のときは上の方法だと(1,2,3)のトライアングルが上向きと判定されるので分ける
+            if (ary[0] == 0 && ary[1] == 1 && ary[2] == 2) return 0;
+            if (ary[0] == 1 && ary[1] == 2 && ary[2] == 3) return 1;
+        }
+        return -1;
+    }
+    
+    IEnumerator SpringSimulate() {
+        if (isCoroutineRunning) yield break;
+        isCoroutineRunning = true;
+        int[] dx = new int[] { -1, 0, 1, 0, -1, -1, 1, 1 };
+        int[] dy = new int[] { 0, -1, 0, 1, 1, -1, 1, -1 };
+        //シミュレーション前の座標をコピーしておく
+        Vector3[] oldposition_array = new Vector3[Vertices.Length];
+        for (int i = 0; i < oldposition_array.Length; i++) oldposition_array[i] = Vertices[i].transform.position;
+        //N*Nの点それぞれについてシミュレーション前の座標を元に次の位置を計算
+        for (int i = 0; i < N * N; i++) {
+            int h = i / N; int w = i % N;
+            Vector3 force = new Vector3(0, 0, 0);
+            //ばねで接続されている物体との力の合力を計算
+            for (int j = 0; j < dx.Length; j++) {
+                if (h + dx[j] < 0 || h + dx[j] >= N || w + dy[j] < 0 || w + dy[j] >= N) continue;
+                int v1 = GetVertIndex(h, w); int v2 = GetVertIndex(h + dx[j], w + dy[j]);
+                EdgeScript nowedge = Edges[GetEdgeIndex(v1, v2)].GetComponent<EdgeScript>();
+                Vector3 direction = Vector3.Normalize(oldposition_array[v2] - oldposition_array[v1]); //方向ベクトル
+                force += direction * (nowedge.nowlength - nowedge.naturallength);
+            }
+            force *= SpringConstant; //精度のために最後にバネ定数かける
+            Vertices[i].transform.position += force * delta;
+            //外力
+            if (i == 0) Vertices[i].transform.position += SpringConstant * ExternalForce * delta;
+            if (i == N * N - 1) Vertices[i].transform.position -= SpringConstant * ExternalForce * delta;
+        }
+        //シミュレーション後にバネの現在の長さを再計算しておく
+        for (int i = 0; i < Edges.Length; i++) Edges[i].GetComponent<EdgeScript>().CalcNowLength();
+        isCoroutineRunning = false;
+        yield break;
+    }
+
+    IEnumerator SpringSimulate2() {
+        if (isCoroutineRunning) yield break;
+        isCoroutineRunning = true;
+        if (brokenflag) yield break;
+        //近接最大6面の面積バネを考慮したシミュレーションを行う
+        //シミュレーション前の座標をコピーしておく
+        Vector3[] oldposition_array = new Vector3[Vertices.Length];
+        for (int t = 0; t < oldposition_array.Length; t++) oldposition_array[t] = Vertices[t].transform.position;
+        //N*Nの点それぞれについてシミュレーション前の座標を元に次の位置を計算
+        //StreamWriter sw = new StreamWriter("../LogData.txt", true); //true=追記 false=上書き
+        for (int i = 0; i < N * N; i++) {
+            int h = i / N; int w = i % N;
+            Vector3 force = new Vector3(0, 0, 0);
+            //近接6面の頂点リスト作成用配列
+            int[] dx = new int[] { 0, 1, 1, 0, -1, -1 }; //+dx[]*N
+            int[] dy = new int[] { -1, -1, 0, 1, 1, 0 }; //+dy[]+1
+            for (int j = 0; j < dx.Length; j++) {
+                //頂点iとrjとrkで囲まれた三角形のバネを考慮した力を計算する
+                int kindex = (j + 1) % dx.Length; //(0,1),(1,2),(3,4),(4,5),(5,0)の(5,0)が(5,6)にならないように
+                int rj_index = i + dx[j] * N + dy[j];
+                int rk_index = i + dx[kindex] * N + dy[kindex];
+                //sw.WriteLine(string.Format("i={0}, j={1}, h = {2}, w = {3}, rj_index = {4}, rk_index = {5}", i, j, h, w, rj_index, rk_index));
+                //存在しない場合はスキップ
+                if (h + dx[j] < 0 || h + dx[j] >= N || w + dy[j] < 0 || w + dy[j] >= N) continue;
+                if (h + dx[kindex] < 0 || h + dx[kindex] >= N || w + dy[kindex] < 0 || w + dy[kindex] >= N) continue;
+
+                Vector3 ri = oldposition_array[i];
+                Vector3 rj = oldposition_array[rj_index];
+                Vector3 rk = oldposition_array[rk_index];
+                Vector3 dki = rk - ri; Vector3 dji = rj - ri;
+                float tmp_fx = dji.x * dki.sqrMagnitude + dki.x * dji.sqrMagnitude - (dji.x + dki.x) * Vector3.Dot(dki, dji);
+                float tmp_fy = dji.y * dki.sqrMagnitude + dki.y * dji.sqrMagnitude - (dji.y + dki.y) * Vector3.Dot(dki, dji);
+                float tmp_fz = dji.z * dki.sqrMagnitude + dki.z * dji.sqrMagnitude - (dji.z + dki.z) * Vector3.Dot(dki, dji);
+                float cross = Vector3.Magnitude(Vector3.Cross(dki, dji));
+                Vector3 res = new Vector3(tmp_fx / cross / 2.0f, tmp_fy / cross / 2.0f, tmp_fz / cross / 2.0f);
+                int surfaceindex = GetSurfaceIndex(i, rj_index, rk_index);
+                SurfaceScript ss = Surfaces[surfaceindex].GetComponent<SurfaceScript>();
+                //(S - s0)かける
+                res *= (ss.now_area - ss.natural_area * 4.0f);
+                force += res;
+            }
+            //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force * SpringConstant;
+            force *= SpringConstant * 0.1f; //精度のために最後にバネ定数かける
+            //forceが崩壊した場合はエラーフラグを立てて終了
+            if (float.IsNaN(force.x) || float.IsNaN(force.y) || float.IsNaN(force.z) || float.IsInfinity(force.x) || float.IsInfinity(force.y) || float.IsInfinity(force.z)) {
+                Console.WriteLine(force.x);
+                brokenflag = true;
+                isCoroutineRunning = false;
+                yield break;
+            }
+            Vertices[i].transform.position += force * delta;
+            //外力
+            if (i == 0) Vertices[i].transform.position += ExternalForce * delta;
+            if (i == N * N - 1) Vertices[i].transform.position -= ExternalForce * delta;
+            if (float.IsNaN(Vertices[0].transform.position.x) || float.IsNaN(Vertices[0].transform.position.y) || float.IsNaN(Vertices[0].transform.position.z)
+                || float.IsInfinity(Vertices[0].transform.position.x) || float.IsInfinity(Vertices[0].transform.position.y) || float.IsInfinity(Vertices[0].transform.position.z)) {
+                brokenflag = true;
+                isCoroutineRunning = false;
+                yield break;
+            }
+        }
+        //シミュレーション後に面積ばねの現在の面積を再計算しておく
+        for (int i = 0; i < Surfaces.Length; i++) Surfaces[i].GetComponent<SurfaceScript>().CalcNowArea();
+        isCoroutineRunning = false;
+        yield break;
+    }
+
+    IEnumerator SpringSimulate3() {
+        float natural_bendangle = (float)Math.PI / 2.0f;
+        if (isCoroutineRunning) yield break;
+        isCoroutineRunning = true;
+        int[] dx = new int[] { -1, 0, 1, 0, -1, -1, 1, 1 };
+        int[] dy = new int[] { 0, -1, 0, 1, 1, -1, 1, -1 };
+        //シミュレーション前の座標をコピーしておく
+        Vector3[] oldposition_array = new Vector3[Vertices.Length];
+        for (int i = 0; i < oldposition_array.Length; i++) oldposition_array[i] = Vertices[i].transform.position;
+        //各頂点にかかる力の格納用変数
+        Vector3[] force_array = new Vector3[Vertices.Length];
+        for (int i = 0; i < force_array.Length; i++) force_array[i] = Vector3.zero;
+        //2面のヒンジになっているEdgeすべてについて調べて各頂点にかかる力を計算する
+        //横ヒンジ(N-2)*(N-1)
+        for (int i = 1; i < N - 1; i++) {
+            for (int j = 0; j < N - 1; j++) {
+                //(i-1,j+1),(i,j),(i,j+1),(i+1,j)によるヒンジ
+                int x0 = GetVertIndex(i - 1, j + 1);
+                int x1 = GetVertIndex(i, j);
+                int x2 = GetVertIndex(i, j + 1);
+                int x3 = GetVertIndex(i + 1, j);
+                HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
+                //dphi/dtheta = (2) * springconstant * (theta_i - theta_natural) springconstantは最後にかける
+                force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
+                force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
+                force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
+                force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
+            }
+        }
+        //縦ヒンジ(N-1)*(N-2)
+        for (int i = 0; i < N - 1; i++) {
+            for (int j = 1; j < N - 1; j++) {
+                //(i,j+1),(i,j),(i+1,j),(i+1,j-1)によるヒンジ
+                int x0 = GetVertIndex(i, j + 1);
+                int x1 = GetVertIndex(i, j);
+                int x2 = GetVertIndex(i + 1, j);
+                int x3 = GetVertIndex(i + 1, j - 1);
+                HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
+                //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
+                force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
+                force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
+                force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
+                force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
+            }
+        }
+        //左下ヒンジ(N-1)*(N-1)
+        for (int i = 0; i < N - 1; i++) {
+            for (int j = 0; j < N - 1; j++) {
+                //(i,j),(i+1,j),(i,j+1),(i+1,j+1)によるヒンジ
+                int x0 = GetVertIndex(i, j);
+                int x1 = GetVertIndex(i + 1, j);
+                int x2 = GetVertIndex(i, j + 1);
+                int x3 = GetVertIndex(i + 1, j + 1);
+                HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
+                //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
+                force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
+                force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
+                force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
+                force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
+            }
+        }
+        //force_arrayが崩壊した場合はエラーフラグを立てて終了
+        foreach (Vector3 v in force_array) {
+            if(float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z) || float.IsInfinity(v.x) || float.IsInfinity(v.y) || float.IsInfinity(v.z)) {
+                brokenflag = true;
+                isCoroutineRunning = false;
+                yield break;
+            }
+        }
+        //すべての点を計算した力に基づいて動かす
+        for (int i = 0; i < N * N; i++) {
+            //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force_array[i] * (10.0f / force_array[i].magnitude);
+            //Vertices[i].transform.position += SpringConstant * force_array[i] * delta;
+            Vertices[i].transform.position += 30.0f * force_array[i] * delta;
+            //外力
+            if (i == 0) Vertices[i].transform.position += ExternalForce * delta;
+            if (i == N * N - 1) Vertices[i].transform.position -= ExternalForce * delta;
+        }
+        isCoroutineRunning = false;
+        yield break;
+    }
+    #endregion
+
+    public void PositionReset() {
+        //頂点のリセット
+        //(1,0) (0,1)→(1,0)(1/2,√3/2)の射交座標へ変換すると正方形が正三角形2つの平行四辺形になる
+        double basecenter = N * SphereInterval / 2.0;
+        double centerx = basecenter + basecenter / 2.0;
+        double centerz = basecenter * Math.Sqrt(3) / 2.0;
+        for (int i = 0; i < N * N; i++) {
+            int h = i / N; int w = i % N;
+            double basex = h * SphereInterval; double basey = w * SphereInterval;
+            double posx = basex + basey / 2.0;
+            double posz = basey * Math.Sqrt(3) / 2.0;
+            Vertices[i].transform.position = new Vector3((float)(posx - centerx), 0, (float)(posz - centerz));
+        }
+        //頂点をリセットしたのでbrokenflagは戻す
+        brokenflag = false;
+        //面オブジェクトの座標も更新
+        SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
+    }
+}
