@@ -6,6 +6,8 @@ public class Main : MonoBehaviour {
     public Slider XSlider, YSlider, ZSlider, SpringConstantSlider, DeltaSlider, NSlider;
     public Text XValText, YValText, ZValText, SpringConstantSliderText, DeltaSliderText;
     public Text StartStopButtonText, NText;
+    public Dropdown HingeNaturalBendangleDropdown, SurfaceSpringNaturalDropdown;
+    public Toggle toggle1, toggle2, toggle3;
     #endregion
     
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
@@ -37,6 +39,11 @@ public class Main : MonoBehaviour {
         DeltaSliderText.text = t.delta.ToString();
         NSlider.value = t.N;
         NText.text = t.N.ToString();
+        HingeNaturalBendangleDropdown.value = 6; //0度
+        SurfaceSpringNaturalDropdown.value = 1; //x1.0f
+        toggle1.isOn = t.isSimulateOn[0];
+        toggle2.isOn = t.isSimulateOn[1];
+        toggle3.isOn = t.isSimulateOn[2];
     }
     private void UpdateExternalForce() {
         ExternalForce = new Vector3(XSlider.value, YSlider.value, ZSlider.value);
@@ -99,6 +106,24 @@ public class Main : MonoBehaviour {
             g.GetComponent<TriangleSheet>().Vertices[TriangleSheet.N * TriangleSheet.N - 1].transform.position = new Vector3(f.x, f.y -= 100.0f, f.z);
             g.GetComponent<TriangleSheet>().SurfaceObject.GetComponent<SurfaceObject>().UpdateMesh(g.GetComponent<TriangleSheet>().Vertices);
         }*/
+    }
+
+    public void OnHingeNaturalBendangleDropdownChanged() {
+        int angle = -180 + HingeNaturalBendangleDropdown.value * 30;
+        ManageSheet.GetComponent<TriangleSheet>().natural_bendangle = angle * Mathf.PI / 180.0f;
+    }
+    public void OnSurfaceSpringNaturalDropdownChanged() {
+        float[] values = new float[] { 0.5f, 1.0f, 2.0f, 3.0f };
+        ManageSheet.GetComponent<TriangleSheet>().surfacespring_naturalduration = values[SurfaceSpringNaturalDropdown.value];
+    }
+    public void OnToggle1Changed() {
+        ManageSheet.GetComponent<TriangleSheet>().isSimulateOn[0] = toggle1.isOn;
+    }
+    public void OnToggle2Changed() {
+        ManageSheet.GetComponent<TriangleSheet>().isSimulateOn[1] = toggle2.isOn;
+    }
+    public void OnToggle3Changed() {
+        ManageSheet.GetComponent<TriangleSheet>().isSimulateOn[2] = toggle3.isOn;
     }
     #endregion
 }

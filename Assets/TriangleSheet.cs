@@ -30,7 +30,10 @@ public class TriangleSheet : MonoBehaviour {
     private bool brokenflag = false; //崩壊したかのフラグ
     //Coroutineが複数出現しないようにするフラグ
     bool isCoroutineRunning = false;
-
+    public bool[] isSimulateOn;//どのシミュレーションを使用するか
+    //シミュレーションパラメータ
+    public float natural_bendangle = 0; //自然角度
+    public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
     void Start() {
         timeCounter = delta;
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
@@ -182,9 +185,9 @@ public class TriangleSheet : MonoBehaviour {
                 oldposition_array[i] = Vertices[i].transform.position;
             }
             //シミュレートを実行
-            //StartCoroutine(SpringSimulate());
-            //StartCoroutine(SpringSimulate2());
-            for(int i = 0; i < 100; i++) StartCoroutine(SpringSimulate3());
+            if(isSimulateOn[0]) StartCoroutine(SpringSimulate());
+            if (isSimulateOn[1]) StartCoroutine(SpringSimulate2());
+            if (isSimulateOn[2]) for (int i = 0; i < 100; i++) StartCoroutine(SpringSimulate3()); //速度のためroop
             SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
             //もしシミュレーション結果、値が崩壊した場合、座標をシミュレーション前の座標に戻してシミュレーションを自動停止
             if (brokenflag) {
@@ -320,7 +323,7 @@ public class TriangleSheet : MonoBehaviour {
                 int surfaceindex = GetSurfaceIndex(i, rj_index, rk_index);
                 SurfaceScript ss = Surfaces[surfaceindex].GetComponent<SurfaceScript>();
                 //(S - s0)かける
-                res *= (ss.now_area - ss.natural_area * 4.0f);
+                res *= (ss.now_area - ss.natural_area * this.surfacespring_naturalduration);
                 force += res;
             }
             //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force * SpringConstant;
@@ -350,7 +353,6 @@ public class TriangleSheet : MonoBehaviour {
     }
 
     IEnumerator SpringSimulate3() {
-        float natural_bendangle = (float)Math.PI / 2.0f;
         if (isCoroutineRunning) yield break;
         isCoroutineRunning = true;
         int[] dx = new int[] { -1, 0, 1, 0, -1, -1, 1, 1 };
@@ -372,6 +374,7 @@ public class TriangleSheet : MonoBehaviour {
                 int x3 = GetVertIndex(i + 1, j);
                 HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = (2) * springconstant * (theta_i - theta_natural) springconstantは最後にかける
+                //-1忘れるとバグる
                 force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
                 force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
                 force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
@@ -388,6 +391,7 @@ public class TriangleSheet : MonoBehaviour {
                 int x3 = GetVertIndex(i + 1, j - 1);
                 HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
+                //-1忘れるとバグる
                 force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
                 force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
                 force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
@@ -404,6 +408,7 @@ public class TriangleSheet : MonoBehaviour {
                 int x3 = GetVertIndex(i + 1, j + 1);
                 HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
+                //-1忘れるとバグる
                 force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
                 force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
                 force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
