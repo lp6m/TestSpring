@@ -176,6 +176,26 @@ public class TriangleSheet : MonoBehaviour {
     }
     // Update is called once per frame
     void Update() {
+        //最もマウスに近い点を検出したい
+        /*float mindis = 100.0f;
+        int nearestindex = -1;
+        for (int i = 0; i < Vertices.Length; i++) {
+            //カメラの左下は(0, 0) に、右上は (1, 1) 
+            Vector2 vpos = Camera.main.WorldToViewportPoint(Vertices[i].transform.position);
+            Vector2 mousepos = Input.mousePosition;
+            float dis = Vector2.Distance(vpos, mousepos);
+            if (i == 0) mindis = dis;
+            else if (dis < mindis) {
+                nearestindex = i;
+                mindis = dis;
+            }
+        }
+        if (nearestindex <= Vertices.Length) { //途中でN変更されたときバグるので
+            Vector3 nearestpos = Vertices[nearestindex].transform.position;
+            string str = string.Format("index = {0} \n x = {1}, y = {2}, z = {3}", nearestindex, nearestpos.x, nearestpos.y, nearestpos.z);
+            GameObject.Find("PositionLabel").GetComponent<UnityEngine.UI.Text>().text = str;
+        }*/
+            #region SimulateMain
         if (issimulating == false) return;
         timeCounter -= Time.deltaTime;
         if (timeCounter < 0) {
@@ -195,6 +215,7 @@ public class TriangleSheet : MonoBehaviour {
             }
             timeCounter = delta;
         }
+        #endregion
     }
     public void UpdateExternalForce(Vector3 externalforce) {
         if (ForceArrows[0] == null || ForceArrows[N*N-1] == null) return; //アプリケーション開始時に実行されるがまだInstantiateされてないことがある
