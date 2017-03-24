@@ -22,7 +22,7 @@ public class TriangleSheet : MonoBehaviour {
     private GameObject[] ForceArrows;
     //面を貼るオブジェクト
     public GameObject SurfaceGameObject;
-    public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
+    public float MaxForceSizeXYZ, MinForceSizeXYZ;
     private Vector3 ExternalForce;
     public bool issimulating = false;
     public float delta;
@@ -31,6 +31,9 @@ public class TriangleSheet : MonoBehaviour {
     //Coroutineが複数出現しないようにするフラグ
     bool isCoroutineRunning = false;
     public bool[] isSimulateOn;//どのシミュレーションを使用するか
+    public int[] SimulateSpeed;//何回コルーチン呼ぶか
+    public float DefaultSpringConstant;
+    public float[] SpringConstants;
     //シミュレーションパラメータ
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
@@ -205,9 +208,11 @@ public class TriangleSheet : MonoBehaviour {
                 oldposition_array[i] = Vertices[i].transform.position;
             }
             //シミュレートを実行
-            if(isSimulateOn[0]) StartCoroutine(SpringSimulate());
-            if (isSimulateOn[1]) StartCoroutine(SpringSimulate2());
-            if (isSimulateOn[2]) for (int i = 0; i < 100; i++) StartCoroutine(SpringSimulate3()); //速度のためroop
+            for (int j = 0; j < 10; j++) {
+                if (isSimulateOn[0]) for (int i = 0; i < SimulateSpeed[0]; i++) StartCoroutine(SpringSimulate());
+                if (isSimulateOn[1]) for (int i = 0; i < SimulateSpeed[1]; i++) StartCoroutine(SpringSimulate2());
+                if (isSimulateOn[2]) for (int i = 0; i < SimulateSpeed[2]; i++) StartCoroutine(SpringSimulate3()); //速度のためroop
+            }
             SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
             //もしシミュレーション結果、値が崩壊した場合、座標をシミュレーション前の座標に戻してシミュレーションを自動停止
             if (brokenflag) {
@@ -294,11 +299,11 @@ public class TriangleSheet : MonoBehaviour {
                 Vector3 direction = Vector3.Normalize(oldposition_array[v2] - oldposition_array[v1]); //方向ベクトル
                 force += direction * (nowedge.nowlength - nowedge.naturallength);
             }
-            force *= SpringConstant; //精度のために最後にバネ定数かける
+            force *= SpringConstants[0]; //精度のために最後にバネ定数かける
             Vertices[i].transform.position += force * delta;
             //外力
-            if (i == 0) Vertices[i].transform.position += SpringConstant * ExternalForce * delta;
-            if (i == N * N - 1) Vertices[i].transform.position -= SpringConstant * ExternalForce * delta;
+            if (i == 0) Vertices[i].transform.position += SpringConstants[0] * ExternalForce * delta;
+            if (i == N * N - 1) Vertices[i].transform.position -= SpringConstants[0] * ExternalForce * delta;
         }
         //シミュレーション後にバネの現在の長さを再計算しておく
         for (int i = 0; i < Edges.Length; i++) Edges[i].GetComponent<EdgeScript>().CalcNowLength();
@@ -348,7 +353,7 @@ public class TriangleSheet : MonoBehaviour {
                 force += res;
             }
             //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force * SpringConstant;
-            force *= SpringConstant * 0.1f; //精度のために最後にバネ定数かける
+            force *= SpringConstants[1] * 0.1f; //精度のために最後にバネ定数かける
             //forceが崩壊した場合はエラーフラグを立てて終了
             if (float.IsNaN(force.x) || float.IsNaN(force.y) || float.IsNaN(force.z) || float.IsInfinity(force.x) || float.IsInfinity(force.y) || float.IsInfinity(force.z)) {
                 Console.WriteLine(force.x);
@@ -448,10 +453,10 @@ public class TriangleSheet : MonoBehaviour {
         for (int i = 0; i < N * N; i++) {
             //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force_array[i] * (10.0f / force_array[i].magnitude);
             //Vertices[i].transform.position += SpringConstant * force_array[i] * delta;
-            Vertices[i].transform.position += 30.0f * force_array[i] * delta;
+            Vertices[i].transform.position += SpringConstants[2] * force_array[i] * delta;
             //外力
-            if (i == 0) Vertices[i].transform.position += ExternalForce * delta;
-            if (i == N * N - 1) Vertices[i].transform.position -= ExternalForce * delta;
+            //if (i == 0) Vertices[i].transform.position += ExternalForce * delta;
+            //if (i == N * N - 1) Vertices[i].transform.position -= ExternalForce * delta;
         }
         isCoroutineRunning = false;
         yield break;

@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 public class Main : MonoBehaviour {
     #region GUIComponent
-    public Slider XSlider, YSlider, ZSlider, SpringConstantSlider, DeltaSlider, NSlider;
-    public Text XValText, YValText, ZValText, SpringConstantSliderText, DeltaSliderText;
+    public Slider XSlider, YSlider, ZSlider, DeltaSlider, NSlider;
+    public Text XValText, YValText, ZValText,DeltaSliderText;
     public Text StartStopButtonText, NText;
     public Dropdown HingeNaturalBendangleDropdown, SurfaceSpringNaturalDropdown;
     public Toggle toggle1, toggle2, toggle3;
+    public Slider SpeedSlider1, SpeedSlider2, SpeedSlider3;
+    public Text SpeedSliderText1, SpeedSliderText2, SpeedSliderText3;
+    public Slider[] SpringConstantSliders;
+    public Text[] SpringConstantTexts;
     #endregion
     
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
@@ -33,8 +37,6 @@ public class Main : MonoBehaviour {
         TriangleSheet t = ManageSheet.GetComponent<TriangleSheet>();
         XSlider.value = YSlider.value = ZSlider.value = 0;
         XValText.text = YValText.text = ZValText.text = "0";
-        SpringConstantSlider.value = t.SpringConstant;
-        SpringConstantSliderText.text = t.SpringConstant.ToString();
         DeltaSlider.value = t.delta;
         DeltaSliderText.text = t.delta.ToString();
         NSlider.value = t.N;
@@ -44,6 +46,17 @@ public class Main : MonoBehaviour {
         toggle1.isOn = t.isSimulateOn[0];
         toggle2.isOn = t.isSimulateOn[1];
         toggle3.isOn = t.isSimulateOn[2];
+        SpeedSlider1.value = t.SimulateSpeed[0];
+        SpeedSlider2.value = t.SimulateSpeed[1];
+        SpeedSlider3.value = t.SimulateSpeed[2];
+        SpeedSliderText1.text = SpeedSlider1.value.ToString();
+        SpeedSliderText2.text = SpeedSlider2.value.ToString();
+        SpeedSliderText3.text = SpeedSlider3.value.ToString();
+        for (int i = 0; i < 3; i++) {
+            SpringConstantSliders[i].value = t.DefaultSpringConstant;
+            SpringConstantTexts[i].text = SpringConstantSliders[i].value.ToString();
+        }
+
     }
     private void UpdateExternalForce() {
         ExternalForce = new Vector3(XSlider.value, YSlider.value, ZSlider.value);
@@ -73,9 +86,11 @@ public class Main : MonoBehaviour {
     }
     public void OnParamResetButtonPressed() {
         XSlider.value = YSlider.value = ZSlider.value = 0;
-        SpringConstantSlider.value = 0.2f;
+        for(int i = 0; i < 3; i++) SpringConstantSliders[i].value = 0.2f;
         DeltaSlider.value = 0.001f;
-        OnSpringConstantSliderChanged();
+        OnSpringConstantSlider1Changed();
+        OnSpringConstantSlider2Changed();
+        OnSpringConstantSlider3Changed();
         OnDeltaSliderValueChanged();
         OnXSliderChanged();
         OnYSliderChanged();
@@ -84,10 +99,20 @@ public class Main : MonoBehaviour {
     public void OnPositionResetButtonPressed() {
         ManageSheet.GetComponent<TriangleSheet>().PositionReset();
     }
-    public void OnSpringConstantSliderChanged() {
-        SpringConstant = SpringConstantSlider.value;
-        SpringConstantSliderText.text = SpringConstantSlider.value.ToString();
-        ManageSheet.GetComponent<TriangleSheet>().SpringConstant = SpringConstant;
+    public void OnSpringConstantSlider1Changed() {
+        
+        SpringConstantTexts[0].text = SpringConstantSliders[0].value.ToString();
+        ManageSheet.GetComponent<TriangleSheet>().SpringConstants[0] = SpringConstantSliders[0].value;
+    }
+    public void OnSpringConstantSlider2Changed() {
+
+        SpringConstantTexts[1].text = SpringConstantSliders[1].value.ToString();
+        ManageSheet.GetComponent<TriangleSheet>().SpringConstants[1] = SpringConstantSliders[1].value;
+    }
+    public void OnSpringConstantSlider3Changed() {
+
+        SpringConstantTexts[2].text = SpringConstantSliders[2].value.ToString();
+        ManageSheet.GetComponent<TriangleSheet>().SpringConstants[2] = SpringConstantSliders[2].value;
     }
 
     public void OnDeltaSliderValueChanged() {
@@ -124,6 +149,18 @@ public class Main : MonoBehaviour {
     }
     public void OnToggle3Changed() {
         ManageSheet.GetComponent<TriangleSheet>().isSimulateOn[2] = toggle3.isOn;
+    }
+    public void OnSpeedSlider1Changed() {
+        ManageSheet.GetComponent<TriangleSheet>().SimulateSpeed[0] = (int)SpeedSlider1.value;
+        SpeedSliderText1.text = SpeedSlider1.value.ToString();
+    }
+    public void OnSpeedSlider2Changed() {
+        ManageSheet.GetComponent<TriangleSheet>().SimulateSpeed[1] = (int)SpeedSlider2.value;
+        SpeedSliderText2.text = SpeedSlider2.value.ToString();
+    }
+    public void OnSpeedSlider3Changed() {
+        ManageSheet.GetComponent<TriangleSheet>().SimulateSpeed[2] = (int)SpeedSlider3.value;
+        SpeedSliderText3.text = SpeedSlider3.value.ToString();
     }
     #endregion
 }
