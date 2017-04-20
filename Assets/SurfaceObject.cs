@@ -7,6 +7,8 @@ public class SurfaceObject : MonoBehaviour {
     int[] triangles;
     public Material VertexMaterial;
     public TriangleSheet sheet; //この三角シートの面をつくる
+
+    private List<Vector3> VertexList = new List<Vector3>();
     // Use this for initialization
     void Start () {
         SurfaceObjectMesh = new Mesh();
@@ -49,20 +51,44 @@ public class SurfaceObject : MonoBehaviour {
     public void UpdateMesh(GameObject[] vertexobjects) {
         if (SurfaceObjectMesh == null) return;
         MeshFilter meshfilter = GetComponent<MeshFilter>();
-        List<Vector3> tmpList = new List<Vector3>();
-        foreach (GameObject g in vertexobjects) tmpList.Add(g.transform.position);
+        VertexList.Clear();
+        foreach (GameObject g in vertexobjects) VertexList.Add(g.transform.position);
         //裏のために頂点コピー
-        tmpList.AddRange(tmpList);
-        SurfaceObjectMesh.vertices = tmpList.ToArray();
+        VertexList.AddRange(VertexList);
+        SurfaceObjectMesh.vertices = VertexList.ToArray();
         SurfaceObjectMesh.triangles = triangles;
 
         SurfaceObjectMesh.RecalculateNormals();
         SurfaceObjectMesh.RecalculateBounds();
 
         meshfilter.sharedMesh = SurfaceObjectMesh;
+
+        GetComponent<MeshCollider>().sharedMesh = SurfaceObjectMesh;
     }
     // Update is called once per frame
     void Update () {
-	
-	}
+        #region TouchSurface
+        //マウスのrayとMeshの当たり判定を行う
+        RaycastHit hit;
+        if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+            return;
+
+        MeshCollider meshCollider = hit.collider as MeshCollider;
+        if (meshCollider == null || meshCollider.sharedMesh == null)
+            return;
+
+        Mesh mesh = meshCollider.sharedMesh;
+        Vector3[] vertices = mesh.vertices;
+        int[] triangles = mesh.triangles;
+
+        int[] hitindex = new int[3];
+        hitindex[0] = triangles[hit.triangleIndex * 3 + 0];
+        hitindex[1] = triangles[hit.triangleIndex * 3 + 1];
+        hitindex[2] = triangles[hit.triangleIndex * 3 + 2];
+        GLManage glmanage = Camera.main.GetComponent<GLManage>();
+        glmanage.p0 = VertexList[hitindex[0]];
+        glmanage.p1 = VertexList[hitindex[1]];
+        glmanage.p2 = VertexList[hitindex[2]];
+        #endregion 
+    }
 }
