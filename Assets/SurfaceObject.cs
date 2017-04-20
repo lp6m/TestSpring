@@ -69,6 +69,8 @@ public class SurfaceObject : MonoBehaviour {
     void Update () {
         #region TouchSurface
         //マウスのrayとMeshの当たり判定を行う
+
+        //当たっていなければreturn
         RaycastHit hit;
         if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
             return;
@@ -76,7 +78,7 @@ public class SurfaceObject : MonoBehaviour {
         MeshCollider meshCollider = hit.collider as MeshCollider;
         if (meshCollider == null || meshCollider.sharedMesh == null)
             return;
-
+        //マウスのRayが当たったメッシュを取得する
         Mesh mesh = meshCollider.sharedMesh;
         Vector3[] vertices = mesh.vertices;
         int[] triangles = mesh.triangles;
@@ -89,6 +91,7 @@ public class SurfaceObject : MonoBehaviour {
         glmanage.p0 = VertexList[hitindex[0]];
         glmanage.p1 = VertexList[hitindex[1]];
         glmanage.p2 = VertexList[hitindex[2]];
+        
         #endregion 
     }
 }

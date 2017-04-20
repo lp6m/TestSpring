@@ -134,7 +134,7 @@ public class TriangleSheet : MonoBehaviour {
                 ss.sphere3 = Vertices[k + N];
             }
             else {
-                //(k, k+N, k+N+1)のtriangle
+                //(k, k+N, k+N-1)のtriangle
                 int tmp = (i - 1) / 2;
                 int k = N * (tmp / (N - 1)) + (tmp % (N - 1)) + 1;
                 ss.sphere1 = Vertices[k];

@@ -19,7 +19,8 @@ public class GLManage : MonoBehaviour {
 
     //UnityシステムからRender時に呼び出されるメソッド.ここでGL描画を呼び出す必要がある. GameView用
     void OnPostRender() {
-        DrawQuad(p0, p1, p2, Color.red, RedMaterial);
+        DrawTriangle(p0, p1, p2, Color.red, RedMaterial);
+        DrawQuad(p0, p1, p2, p3, Color.red, RedMaterial);
     }
 
     //UnityシステムからRender時に呼び出されるメソッド.ここでGL描画を呼び出す必要がある. Editor用
@@ -62,7 +63,7 @@ public class GLManage : MonoBehaviour {
 
     }*/
     //GL.PushMatrix及びGL.PopMatrixは何度も呼び出すと重たくなるのでこの関数をループで何度も呼び出すのは避ける
-    void DrawQuad(Vector3 v0, Vector3 v1, Vector3 v2, Color col, Material mat) {
+    void DrawTriangle(Vector3 v0, Vector3 v1, Vector3 v2, Color col, Material mat) {
         if (RedMaterial == null) return;
         mat.SetPass(0);
         GL.PushMatrix();
@@ -71,6 +72,20 @@ public class GLManage : MonoBehaviour {
         GL.Vertex3(v0.x, v0.y + 1.5f, v0.z);
         GL.Vertex3(v1.x, v1.y + 1.5f, v1.z);
         GL.Vertex3(v2.x, v2.y + 1.5f, v2.z);
+        GL.End();
+        GL.PopMatrix();
+    }
+
+    void DrawQuad(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3, Color col, Material mat) {
+        if (RedMaterial == null) return;
+        mat.SetPass(0);
+        GL.PushMatrix();
+        GL.Begin(GL.QUADS);
+        GL.Color(col);
+        GL.Vertex3(v0.x, v0.y + 1.5f, v0.z);
+        GL.Vertex3(v1.x, v1.y + 1.5f, v1.z);
+        GL.Vertex3(v2.x, v2.y + 1.5f, v2.z);
+        GL.Vertex3(v3.x, v3.y + 1.5f, v3.z);
         GL.End();
         GL.PopMatrix();
     }
