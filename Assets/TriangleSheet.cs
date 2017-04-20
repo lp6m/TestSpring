@@ -154,8 +154,8 @@ public class TriangleSheet : MonoBehaviour {
         #endregion
         #region SetSurfaceObject
         //面をもつオブジェクトに座標を設定する
+        if (SurfaceGameObject != null) Destroy(SurfaceGameObject);
         SurfaceGameObject = Instantiate(SurfaceObjectPrefab); 
-        SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
         SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
         SurfaceGameObject.GetComponent<SurfaceObject>().sheet = this;
         #endregion
@@ -198,7 +198,8 @@ public class TriangleSheet : MonoBehaviour {
             string str = string.Format("index = {0} \n x = {1}, y = {2}, z = {3}", nearestindex, nearestpos.x, nearestpos.y, nearestpos.z);
             GameObject.Find("PositionLabel").GetComponent<UnityEngine.UI.Text>().text = str;
         }*/
-            #region SimulateMain
+        SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
+        #region SimulateMain    
         if (issimulating == false) return;
         timeCounter -= Time.deltaTime;
         if (timeCounter < 0) {
@@ -213,7 +214,6 @@ public class TriangleSheet : MonoBehaviour {
                 if (isSimulateOn[1]) for (int i = 0; i < SimulateSpeed[1]; i++) StartCoroutine(SpringSimulate2());
                 if (isSimulateOn[2]) for (int i = 0; i < SimulateSpeed[2]; i++) StartCoroutine(SpringSimulate3()); //速度のためroop
             }
-            SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
             //もしシミュレーション結果、値が崩壊した場合、座標をシミュレーション前の座標に戻してシミュレーションを自動停止
             if (brokenflag) {
                 PositionReset();
