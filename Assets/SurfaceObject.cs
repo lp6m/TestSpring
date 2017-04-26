@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public class SurfaceObject : MonoBehaviour {
     private Mesh SurfaceObjectMesh;
@@ -91,7 +92,52 @@ public class SurfaceObject : MonoBehaviour {
         glmanage.p0 = VertexList[hitindex[0]];
         glmanage.p1 = VertexList[hitindex[1]];
         glmanage.p2 = VertexList[hitindex[2]];
-        
+        if (Input.GetMouseButtonDown(0)) {
+            this.sheet.ChangeSurfaceNaturalDuration(hitindex);
+        }
+        Vector3 hitpos = hit.point;
+        int surfaceindex = this.sheet.GetSurfaceIndex(hitindex[0], hitindex[1], hitindex[2]);
+        int nearest_surface_point = surfaceindex; //今選択している三角形の周囲3つのうちマウスの当たった点から一番ちかい三角形を構成するために必要な点
+        float now_min_dis = float.MaxValue;
+        Array.Sort(hitindex);
+        if (hitindex[0] + 1 == hitindex[1] && hitindex[0] + this.sheet.N == hitindex[2]) {
+            //triangle(k,k+1,k+N)
+            //k+1-N, k+N-1, k+N+1のうち一番近い点を選択
+            int vc = VertexList.Count / 2; //裏面のためコピーされてるので2でわる
+            int k = hitindex[0];
+            int[] candidate = new int[] { k + 1 - this.sheet.N, k + this.sheet.N - 1, k + this.sheet.N + 1 };
+            foreach (int c in candidate) {
+                if (0 <= c && c < vc) {
+                    float dis = Vector3.Distance(VertexList[c], hitpos);
+                    if (dis < now_min_dis) {
+                        now_min_dis = dis;
+                        nearest_surface_point = c;
+                    }
+                }
+            }
+        }
+        else if (hitindex[0] + this.sheet.N - 1 == hitindex[1] && hitindex[1] + 1 == hitindex[2]) {
+            //triangle(k,k+N-1,k+N)
+            //k+2N-1, k-1, k+1のうち一番近い点を選択
+            int vc = VertexList.Count / 2; //裏面のためコピーされてるので2でわる
+            int k = hitindex[0];
+            int[] candidate = new int[] { k - 1, k + 1, k + 2 * this.sheet.N - 1 };
+            foreach(int c in candidate){
+                if (0 <= c && c < vc) {
+                    float dis = Vector3.Distance(VertexList[c], hitpos);
+                    if (dis < now_min_dis) {
+                        now_min_dis = dis;
+                        nearest_surface_point = c;
+                    }
+                }
+            }
+        }
+        int[] quad_index_array = { nearest_surface_point, hitindex[0], hitindex[1], hitindex[2] };
+        Array.Sort(quad_index_array);
+        glmanage.q0 = VertexList[quad_index_array[0]];
+        glmanage.q1 = VertexList[quad_index_array[1]];
+        glmanage.q2 = VertexList[quad_index_array[3]];
+        glmanage.q3 = VertexList[quad_index_array[2]];
         #endregion 
     }
 }

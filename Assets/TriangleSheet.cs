@@ -37,6 +37,7 @@ public class TriangleSheet : MonoBehaviour {
     //シミュレーションパラメータ
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
+    private float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
     void Start() {
         timeCounter = delta;
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
@@ -54,6 +55,9 @@ public class TriangleSheet : MonoBehaviour {
         Edges = new GameObject[2 * N * (N - 1) + (N - 1) * (N - 1) * 2];
         Surfaces = new GameObject[(N - 1) * (N - 1) * 2];
         ForceArrows = new GameObject[N * N];
+        SurfaceSpring_NaturalDurationArray = new float[2 * (N - 1) * (N - 1)];
+        for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) SurfaceSpring_NaturalDurationArray[i] = 1.0f;
+
         #region MakeVertices
         //頂点の作成
         //(1,0) (0,1)→(1,0)(1/2,√3/2)の射交座標へ変換すると正方形が正三角形2つの平行四辺形になる
@@ -255,7 +259,7 @@ public class TriangleSheet : MonoBehaviour {
     private int GetVertIndex(int h, int w) {
         return h * N + w;
     }
-    private int GetSurfaceIndex(int i, int j, int k) {
+    public int GetSurfaceIndex(int i, int j, int k) {
         //頂点番号i,j,kでかこまれたtriangleがsurfacesのどれにあたるかのインデックスを返す
         int[] ary = new int[] { i, j, k };
         Array.Sort(ary);
@@ -349,7 +353,7 @@ public class TriangleSheet : MonoBehaviour {
                 int surfaceindex = GetSurfaceIndex(i, rj_index, rk_index);
                 SurfaceScript ss = Surfaces[surfaceindex].GetComponent<SurfaceScript>();
                 //(S - s0)かける
-                res *= (ss.now_area - ss.natural_area * this.surfacespring_naturalduration);
+                res *= (ss.now_area - ss.natural_area * SurfaceSpring_NaturalDurationArray[surfaceindex]);
                 force += res;
             }
             //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force * SpringConstant;
@@ -481,4 +485,12 @@ public class TriangleSheet : MonoBehaviour {
         //面オブジェクトの座標も更新
         SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
     }
+
+    #region changeNaturalDuration
+    public void ChangeSurfaceNaturalDuration(int[] vertindex) {
+        int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
+        SurfaceSpring_NaturalDurationArray[surfaceindex] = 2.0f;
+    }
+    #endregion
+
 }

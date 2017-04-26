@@ -3,8 +3,10 @@ using System.Collections;
 
 //GL関連用に一般化しようとしたが現在はSmoothFaceから呼び出すためだけに書いている
 public class GLManage : MonoBehaviour {
-    public Vector3 p0, p1, p2, p3; //現在マウスがあたっている部分を表示するための4頂点
+    public Vector3 p0, p1, p2; //現在マウスがあたっている部分を表示するための3頂点
+    public Vector3 q0, q1, q2, q3; //4活計用
     public Material RedMaterial;
+    public Material BlueMaterial;
     //GLによる表示はカメラにアタッチしたスクリプトで行わなければならない
     //(SmoothFaceにわりあてただけだたとうまくいかなかった)
 
@@ -20,7 +22,7 @@ public class GLManage : MonoBehaviour {
     //UnityシステムからRender時に呼び出されるメソッド.ここでGL描画を呼び出す必要がある. GameView用
     void OnPostRender() {
         DrawTriangle(p0, p1, p2, Color.red, RedMaterial);
-        DrawQuad(p0, p1, p2, p3, Color.red, RedMaterial);
+        DrawQuad(q0, q1, q2, q3, Color.blue, BlueMaterial);
     }
 
     //UnityシステムからRender時に呼び出されるメソッド.ここでGL描画を呼び出す必要がある. Editor用
