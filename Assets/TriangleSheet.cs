@@ -38,6 +38,7 @@ public class TriangleSheet : MonoBehaviour {
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
     private float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
+    private float[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
     void Start() {
         timeCounter = delta;
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
@@ -394,7 +395,7 @@ public class TriangleSheet : MonoBehaviour {
         Vector3[] force_array = new Vector3[Vertices.Length];
         for (int i = 0; i < force_array.Length; i++) force_array[i] = Vector3.zero;
         //2面のヒンジになっているEdgeすべてについて調べて各頂点にかかる力を計算する
-        //横ヒンジ(N-2)*(N-1)
+        //縦ヒンジ(N-2)*(N-1)
         for (int i = 1; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
                 //(i-1,j+1),(i,j),(i,j+1),(i+1,j)によるヒンジ
@@ -411,7 +412,7 @@ public class TriangleSheet : MonoBehaviour {
                 force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
             }
         }
-        //縦ヒンジ(N-1)*(N-2)
+        //左上ヒンジ(N-1)*(N-2)
         for (int i = 0; i < N - 1; i++) {
             for (int j = 1; j < N - 1; j++) {
                 //(i,j+1),(i,j),(i+1,j),(i+1,j-1)によるヒンジ
@@ -428,7 +429,7 @@ public class TriangleSheet : MonoBehaviour {
                 force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
             }
         }
-        //左下ヒンジ(N-1)*(N-1)
+        //右上ヒンジ(N-1)*(N-1)
         for (int i = 0; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
                 //(i,j),(i+1,j),(i,j+1),(i+1,j+1)によるヒンジ
