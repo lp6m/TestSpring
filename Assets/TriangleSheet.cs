@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 //シミュレーションに用いる三角形シート
 public class TriangleSheet : MonoBehaviour {
@@ -38,7 +39,7 @@ public class TriangleSheet : MonoBehaviour {
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
     private float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
-    private float[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
+    private List<float>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
     void Start() {
         timeCounter = delta;
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
@@ -57,6 +58,14 @@ public class TriangleSheet : MonoBehaviour {
         Surfaces = new GameObject[(N - 1) * (N - 1) * 2];
         ForceArrows = new GameObject[N * N];
         SurfaceSpring_NaturalDurationArray = new float[2 * (N - 1) * (N - 1)];
+        Hinge_NaturalDurationAarray = new List<float>[3];
+        Hinge_NaturalDurationAarray[0] = new List<float>();
+        for (int i = 0; i < (N - 2) * (N - 1); i++) Hinge_NaturalDurationAarray[0].Add(0);
+        Hinge_NaturalDurationAarray[1] = new List<float>();
+        for (int i = 0; i < (N - 1) * (N - 2); i++) Hinge_NaturalDurationAarray[1].Add(0);
+        Hinge_NaturalDurationAarray[2] = new List<float>();
+        for (int i = 0; i < (N - 1) * (N - 1); i++) Hinge_NaturalDurationAarray[2].Add(0);
+        
         for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) SurfaceSpring_NaturalDurationArray[i] = 1.0f;
 
         #region MakeVertices
@@ -406,10 +415,11 @@ public class TriangleSheet : MonoBehaviour {
                 HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = (2) * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
-                force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
-                force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
-                force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
-                force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
+                int hinge_index = (N - 1) * (i - 1) + (j + 1) - 1;
+                force_array[x0] += h.f0 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x1] += h.f1 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x2] += h.f2 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x3] += h.f3 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
             }
         }
         //左上ヒンジ(N-1)*(N-2)
@@ -423,10 +433,11 @@ public class TriangleSheet : MonoBehaviour {
                 HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
-                force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
-                force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
-                force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
-                force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
+                int hinge_index = (N - 2) * i + j - 1;
+                force_array[x0] += h.f0 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x1] += h.f1 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x2] += h.f2 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x3] += h.f3 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
             }
         }
         //右上ヒンジ(N-1)*(N-1)
@@ -440,10 +451,11 @@ public class TriangleSheet : MonoBehaviour {
                 HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
-                force_array[x0] += h.f0 * -1 * (h.theta - natural_bendangle);
-                force_array[x1] += h.f1 * -1 * (h.theta - natural_bendangle);
-                force_array[x2] += h.f2 * -1 * (h.theta - natural_bendangle);
-                force_array[x3] += h.f3 * -1 * (h.theta - natural_bendangle);
+                int hinge_index = (N - 1) * i + j;
+                force_array[x0] += h.f0 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x1] += h.f1 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x2] += h.f2 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x3] += h.f3 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
             }
         }
         //force_arrayが崩壊した場合はエラーフラグを立てて終了
@@ -491,6 +503,32 @@ public class TriangleSheet : MonoBehaviour {
     public void ChangeSurfaceNaturalDuration(int[] vertindex) {
         int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
         SurfaceSpring_NaturalDurationArray[surfaceindex] = 2.0f;
+    }
+    public void ChangeHingeNaturalDuration(int[] vertindex) {
+        float angle = 90.0f;//この角度に変更する
+        float change_angle_radian = angle * Mathf.PI / 180.0f;
+        //まずどのタイプのヒンジか調べる必要がある
+        Array.Sort(vertindex);
+        int h = vertindex[0] / N;
+        int w = vertindex[0] % N;
+        if (vertindex[0] + N - 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + 2 * N - 1 == vertindex[3]) {
+            //ヒンジタイプA
+            int hinge_index = (N - 1) * h + w - 1;
+            Hinge_NaturalDurationAarray[0][hinge_index] = change_angle_radian;
+            return;
+        }
+        if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N - 1 == vertindex[2] && vertindex[0] + N == vertindex[3]) {
+            //ヒンジタイプB
+            int hinge_index = (N - 2) * h + w - 1;
+            Hinge_NaturalDurationAarray[1][hinge_index] = change_angle_radian;
+            return;
+        }
+        if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + N + 1 == vertindex[3]) {
+            //ヒンジタイプC
+            int hinge_index = (N - 1) * h + w;
+            Hinge_NaturalDurationAarray[2][hinge_index] = change_angle_radian;
+            return;
+        }
     }
     #endregion
 

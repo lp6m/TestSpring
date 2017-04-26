@@ -136,8 +136,11 @@ public class SurfaceObject : MonoBehaviour {
         Array.Sort(quad_index_array);
         glmanage.q0 = VertexList[quad_index_array[0]];
         glmanage.q1 = VertexList[quad_index_array[1]];
-        glmanage.q2 = VertexList[quad_index_array[3]];
+        glmanage.q2 = VertexList[quad_index_array[3]]; //この順番でないと正しく描画されない
         glmanage.q3 = VertexList[quad_index_array[2]];
+        if (Input.GetMouseButtonDown(1)) {
+            this.sheet.ChangeHingeNaturalDuration(quad_index_array);
+        }
         #endregion 
     }
 }
