@@ -11,6 +11,7 @@ public class TriangleSheet : MonoBehaviour {
     public GameObject EdgePrefab;
     public GameObject SurfacePrefab;
     public GameObject SurfaceObjectPrefab;
+    public GameObject SelectedViewerPrefab;
     public int N = 10;
     public const double SphereInterval = 50.0;
     //頂点
@@ -22,7 +23,9 @@ public class TriangleSheet : MonoBehaviour {
     //頂点にかかる力
     private GameObject[] ForceArrows;
     //面を貼るオブジェクト
-    public GameObject SurfaceGameObject;
+    private GameObject SurfaceGameObject;
+    //選択している場所を表示するためのオブジェクト
+    private GameObject SelectedViewer;
     public float MaxForceSizeXYZ, MinForceSizeXYZ;
     private Vector3 ExternalForce;
     public bool issimulating = false;
@@ -38,7 +41,7 @@ public class TriangleSheet : MonoBehaviour {
     //シミュレーションパラメータ
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
-    private float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
+    public float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
     public List<float>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
     void Start() {
         timeCounter = delta;
@@ -53,6 +56,7 @@ public class TriangleSheet : MonoBehaviour {
         if (Surfaces != null) foreach (GameObject g in Surfaces) Destroy(g);
         if (ForceArrows != null) foreach (GameObject g in ForceArrows) Destroy(g);
         if (SurfaceGameObject != null) Destroy(SurfaceGameObject);
+        if (SelectedViewer != null) Destroy(SelectedViewer);
         Vertices = new GameObject[N * N];
         Edges = new GameObject[2 * N * (N - 1) + (N - 1) * (N - 1) * 2];
         Surfaces = new GameObject[(N - 1) * (N - 1) * 2];
@@ -173,6 +177,12 @@ public class TriangleSheet : MonoBehaviour {
         SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
         SurfaceGameObject.GetComponent<SurfaceObject>().sheet = this;
         #endregion
+        #region SetSelectedViewer
+        if (SelectedViewer != null) Destroy(SelectedViewer);
+        SelectedViewer = Instantiate(SelectedViewerPrefab);
+        SelectedViewer.GetComponent<SelectedViewer>().sheet = this;
+
+        #endregion
     }
     public void StartSimulate() {
         issimulating = true;
@@ -181,8 +191,15 @@ public class TriangleSheet : MonoBehaviour {
         issimulating = false;
     }
     public void ToggleSimulate() {
-        if (issimulating) StopSimulate();
-        else StartSimulate();
+        if (issimulating) {
+            StopSimulate();
+            this.SelectedViewer.GetComponent<SelectedViewer>().OnSimulateStopped();//TODO:ちゃんとToggleにしましょう
+        }
+        else {
+            //選択中のボタンは押せないように
+            this.SelectedViewer.GetComponent<SelectedViewer>().AllSelectedDisable();
+            StartSimulate();
+        }
     }
 
     public int tryChangeNValue(int changeN) {
@@ -501,8 +518,16 @@ public class TriangleSheet : MonoBehaviour {
 
     #region changeNaturalDuration
     public void ChangeSurfaceNaturalDuration(int[] vertindex) {
-        int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
-        SurfaceSpring_NaturalDurationArray[surfaceindex] = 2.0f;
+        //もし面選択モードでないなら変更しない
+        if (SelectedViewer.GetComponent<SelectedViewer>().AreaSpringSelectedVisible == false) return;
+        try {
+            int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
+            SurfaceSpring_NaturalDurationArray[surfaceindex] = 2.0f;
+            this.SelectedViewer.GetComponent<SelectedViewer>().changeAreaMaterial(surfaceindex);
+        }
+        catch (ArgumentOutOfRangeException ex) {
+            Console.WriteLine(ex.Message);
+        }
     }
     public void ChangeHingeNaturalDuration(int[] vertindex) {
         float angle = 90.0f;//この角度に変更する
@@ -529,6 +554,15 @@ public class TriangleSheet : MonoBehaviour {
             Hinge_NaturalDurationAarray[2][hinge_index] = change_angle_radian;
             return;
         }
+    }
+    #endregion
+
+    //選択している場所関連
+    #region SelectedVisible 
+
+    public void ChangeSelectVisible(bool[] isvisible) {
+        if (SelectedViewer == null) return;
+        this.SelectedViewer.GetComponent<SelectedViewer>().ToggleVisible(isvisible);
     }
     #endregion
 

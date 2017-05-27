@@ -12,6 +12,7 @@ public class Main : MonoBehaviour {
     public Text SpeedSliderText1, SpeedSliderText2, SpeedSliderText3;
     public Slider[] SpringConstantSliders;
     public Text[] SpringConstantTexts;
+    public GameObject[] SelectButton;
     #endregion
     
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
@@ -79,9 +80,11 @@ public class Main : MonoBehaviour {
         ManageSheet.GetComponent<TriangleSheet>().ToggleSimulate();
         if (ManageSheet.GetComponent<TriangleSheet>().issimulating) {
             this.StartStopButtonText.text = "Stop";
+            for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(false);
         }
         else {
             this.StartStopButtonText.text = "Start";
+            for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(true);
         }
     }
     public void OnParamResetButtonPressed() {
@@ -157,6 +160,41 @@ public class Main : MonoBehaviour {
     public void OnSpeedSlider3Changed() {
         ManageSheet.GetComponent<TriangleSheet>().SimulateSpeed[2] = (int)SpeedSlider3.value;
         SpeedSliderText3.text = SpeedSlider3.value.ToString();
+    }
+
+    public void OnTwoPointSpringSelectButtonPressed() {
+        ButtonColorChange(ref SelectButton[0], true);
+        ButtonColorChange(ref SelectButton[1], false);
+        ButtonColorChange(ref SelectButton[2], false);
+        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible(new bool[] { true, false, false });
+    }
+    public void OnAreaSpringSelectButtonPressed() {
+        ButtonColorChange(ref SelectButton[0], false);
+        ButtonColorChange(ref SelectButton[1], true);
+        ButtonColorChange(ref SelectButton[2], false);
+        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible(new bool[] { false, true, false });
+    }
+    public void OnHingeStencilSpringSelectButtonPressed() {
+        ButtonColorChange(ref SelectButton[0], false);
+        ButtonColorChange(ref SelectButton[1], false);
+        ButtonColorChange(ref SelectButton[2], true);
+        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible(new bool[] { false, false, true });
+    }
+    public void OnSelectEndButtonPressed() {
+
+    }
+
+    public void ButtonColorChange(ref GameObject b, bool active) {
+        if (active) {
+            ColorBlock cb = b.GetComponent<Button>().colors;
+            cb.normalColor = Color.red; cb.highlightedColor = Color.red;
+            b.GetComponent<Button>().colors = cb;
+        }
+        else {
+            ColorBlock cb = b.GetComponent<Button>().colors;
+            cb.normalColor = Color.white; cb.highlightedColor = Color.white;
+            b.GetComponent<Button>().colors = cb;
+        }
     }
     public void testButton() {
         for (int i = 0; i < 3; i++) {

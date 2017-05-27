@@ -133,13 +133,18 @@ public class SurfaceObject : MonoBehaviour {
             }
         }
         int[] quad_index_array = { nearest_surface_point, hitindex[0], hitindex[1], hitindex[2] };
-        Array.Sort(quad_index_array);
-        glmanage.q0 = VertexList[quad_index_array[0]];
-        glmanage.q1 = VertexList[quad_index_array[1]];
-        glmanage.q2 = VertexList[quad_index_array[3]]; //この順番でないと正しく描画されない
-        glmanage.q3 = VertexList[quad_index_array[2]];
-        if (Input.GetMouseButtonDown(1)) {
-            this.sheet.ChangeHingeNaturalDuration(quad_index_array);
+        try {
+            Array.Sort(quad_index_array);
+            glmanage.q0 = VertexList[quad_index_array[0]];
+            glmanage.q1 = VertexList[quad_index_array[1]];
+            glmanage.q2 = VertexList[quad_index_array[3]]; //この順番でないと正しく描画されない
+            glmanage.q3 = VertexList[quad_index_array[2]];
+            if (Input.GetMouseButtonDown(1)) {
+                this.sheet.ChangeHingeNaturalDuration(quad_index_array);
+            }
+        }
+        catch (ArgumentOutOfRangeException) {
+
         }
         #endregion 
     }
