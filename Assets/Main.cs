@@ -53,7 +53,7 @@ public class Main : MonoBehaviour {
         SpeedSliderText2.text = SpeedSlider2.value.ToString();
         SpeedSliderText3.text = SpeedSlider3.value.ToString();
         for (int i = 0; i < 3; i++) {
-            SpringConstantSliders[i].value = t.DefaultSpringConstant;
+            SpringConstantSliders[i].value = t.DefaultSpringConstant[i];
             SpringConstantTexts[i].text = SpringConstantSliders[i].value.ToString();
         }
 
@@ -86,7 +86,10 @@ public class Main : MonoBehaviour {
     }
     public void OnParamResetButtonPressed() {
         XSlider.value = YSlider.value = ZSlider.value = 0;
-        for(int i = 0; i < 3; i++) SpringConstantSliders[i].value = 0.2f;
+        SpringConstantSliders[0].value = 0.2f;
+        SpringConstantSliders[1].value = 0.2f;
+        SpringConstantSliders[2].value = 10.0f;
+
         DeltaSlider.value = 0.001f;
         OnSpringConstantSlider1Changed();
         OnSpringConstantSlider2Changed();
@@ -125,14 +128,7 @@ public class Main : MonoBehaviour {
         NSlider.value = ManageSheet.GetComponent<TriangleSheet>().tryChangeNValue((int)NSlider.value);
         NText.text = NSlider.value.ToString();
     }
-    public void testButton() {
-        /*foreach (GameObject g in ManageSheets) {
-            Vector3 f = g.GetComponent<TriangleSheet>().Vertices[TriangleSheet.N * TriangleSheet.N - 1].transform.position;
-            g.GetComponent<TriangleSheet>().Vertices[TriangleSheet.N * TriangleSheet.N - 1].transform.position = new Vector3(f.x, f.y -= 100.0f, f.z);
-            g.GetComponent<TriangleSheet>().SurfaceObject.GetComponent<SurfaceObject>().UpdateMesh(g.GetComponent<TriangleSheet>().Vertices);
-        }*/
-    }
-
+   
     public void OnHingeNaturalBendangleDropdownChanged() {
         int angle = -180 + HingeNaturalBendangleDropdown.value * 30;
         ManageSheet.GetComponent<TriangleSheet>().natural_bendangle = angle * Mathf.PI / 180.0f;
@@ -161,6 +157,14 @@ public class Main : MonoBehaviour {
     public void OnSpeedSlider3Changed() {
         ManageSheet.GetComponent<TriangleSheet>().SimulateSpeed[2] = (int)SpeedSlider3.value;
         SpeedSliderText3.text = SpeedSlider3.value.ToString();
+    }
+    public void testButton() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < ManageSheet.GetComponent<TriangleSheet>().Hinge_NaturalDurationAarray[i].Count; j++) {
+                ManageSheet.GetComponent<TriangleSheet>().Hinge_NaturalDurationAarray[i][j] = 0;
+            }
+
+        }
     }
     #endregion
 }

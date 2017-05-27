@@ -33,13 +33,13 @@ public class TriangleSheet : MonoBehaviour {
     bool isCoroutineRunning = false;
     public bool[] isSimulateOn;//どのシミュレーションを使用するか
     public int[] SimulateSpeed;//何回コルーチン呼ぶか
-    public float DefaultSpringConstant;
+    public float[] DefaultSpringConstant;
     public float[] SpringConstants;
     //シミュレーションパラメータ
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
     private float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
-    private List<float>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
+    public List<float>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
     void Start() {
         timeCounter = delta;
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
@@ -412,14 +412,14 @@ public class TriangleSheet : MonoBehaviour {
                 int x1 = GetVertIndex(i, j);
                 int x2 = GetVertIndex(i, j + 1);
                 int x3 = GetVertIndex(i + 1, j);
-                HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
+                HingeStencil.HingeStencilForce hf = HingeStencil.calcHingeStencilForce(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = (2) * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
                 int hinge_index = (N - 1) * (i - 1) + (j + 1) - 1;
-                force_array[x0] += h.f0 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
-                force_array[x1] += h.f1 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
-                force_array[x2] += h.f2 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
-                force_array[x3] += h.f3 * -1 * (h.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x0] += hf.f0 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x1] += hf.f1 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x2] += hf.f2 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x3] += hf.f3 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
             }
         }
         //左上ヒンジ(N-1)*(N-2)
@@ -430,14 +430,14 @@ public class TriangleSheet : MonoBehaviour {
                 int x1 = GetVertIndex(i, j);
                 int x2 = GetVertIndex(i + 1, j);
                 int x3 = GetVertIndex(i + 1, j - 1);
-                HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
+                HingeStencil.HingeStencilForce hf = HingeStencil.calcHingeStencilForce(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
                 int hinge_index = (N - 2) * i + j - 1;
-                force_array[x0] += h.f0 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
-                force_array[x1] += h.f1 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
-                force_array[x2] += h.f2 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
-                force_array[x3] += h.f3 * -1 * (h.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x0] += hf.f0 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x1] += hf.f1 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x2] += hf.f2 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x3] += hf.f3 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
             }
         }
         //右上ヒンジ(N-1)*(N-1)
@@ -448,14 +448,14 @@ public class TriangleSheet : MonoBehaviour {
                 int x1 = GetVertIndex(i + 1, j);
                 int x2 = GetVertIndex(i, j + 1);
                 int x3 = GetVertIndex(i + 1, j + 1);
-                HingeStencil h = new HingeStencil(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
+                HingeStencil.HingeStencilForce hf = HingeStencil.calcHingeStencilForce(oldposition_array[x0], oldposition_array[x1], oldposition_array[x2], oldposition_array[x3]);
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
                 int hinge_index = (N - 1) * i + j;
-                force_array[x0] += h.f0 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
-                force_array[x1] += h.f1 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
-                force_array[x2] += h.f2 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
-                force_array[x3] += h.f3 * -1 * (h.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x0] += hf.f0 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x1] += hf.f1 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x2] += hf.f2 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x3] += hf.f3 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
             }
         }
         //force_arrayが崩壊した場合はエラーフラグを立てて終了
