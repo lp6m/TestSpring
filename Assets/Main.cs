@@ -18,7 +18,6 @@ public class Main : MonoBehaviour {
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
     private Vector3 ExternalForce;
     public float delta;
-    private float timeCounter;
     private GameObject ManageSheet; //シミュレーションするシート
     public GameObject TriangleSheetPrefab;
     // Use this for initialization

@@ -31,5 +31,11 @@ public class EdgeScript : MonoBehaviour {
         line.SetPosition(0, s1);
         line.SetPosition(1, s2);
     }
-    
+    public void changeMaterial(Material material) {
+        this.gameObject.GetComponent<LineRenderer>().material = material;
+    }
+    public void changeWidth(float width) {
+        this.gameObject.GetComponent<LineRenderer>().endWidth = width;
+        this.gameObject.GetComponent<LineRenderer>().startWidth = width;
+    }
 }

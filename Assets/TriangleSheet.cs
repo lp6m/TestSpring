@@ -18,7 +18,7 @@ public class TriangleSheet : MonoBehaviour {
     //頂点
     public GameObject[] Vertices;
     //エッジ
-    private GameObject[] Edges;
+    public GameObject[] Edges;
     //面
     private GameObject[] Surfaces;
     //頂点にかかる力
@@ -542,18 +542,21 @@ public class TriangleSheet : MonoBehaviour {
             //ヒンジタイプA
             int hinge_index = (N - 1) * h + w - 1;
             Hinge_NaturalDurationAarray[0][hinge_index] = change_angle_radian;
+            this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(0, hinge_index);
             return;
         }
         if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N - 1 == vertindex[2] && vertindex[0] + N == vertindex[3]) {
             //ヒンジタイプB
             int hinge_index = (N - 2) * h + w - 1;
             Hinge_NaturalDurationAarray[1][hinge_index] = change_angle_radian;
+            this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(1, hinge_index);
             return;
         }
         if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + N + 1 == vertindex[3]) {
             //ヒンジタイプC
             int hinge_index = (N - 1) * h + w;
             Hinge_NaturalDurationAarray[2][hinge_index] = change_angle_radian;
+            this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, hinge_index);
             return;
         }
     }
