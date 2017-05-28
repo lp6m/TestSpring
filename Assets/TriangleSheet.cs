@@ -532,6 +532,8 @@ public class TriangleSheet : MonoBehaviour {
         }
     }
     public void ChangeHingeNaturalDuration(int[] vertindex) {
+        //もしヒンジ選択モードでないなら変更しない
+        if (GameManagerMain.SelectButton[2].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
         float angle = 90.0f;//この角度に変更する
         float change_angle_radian = angle * Mathf.PI / 180.0f;
         //まずどのタイプのヒンジか調べる必要がある
