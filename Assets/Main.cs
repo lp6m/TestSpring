@@ -163,22 +163,13 @@ public class Main : MonoBehaviour {
     }
 
     public void OnTwoPointSpringSelectButtonPressed() {
-        ButtonColorChange(ref SelectButton[0], true);
-        ButtonColorChange(ref SelectButton[1], false);
-        ButtonColorChange(ref SelectButton[2], false);
-        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible(new bool[] { true, false, false });
+        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible();
     }
     public void OnAreaSpringSelectButtonPressed() {
-        ButtonColorChange(ref SelectButton[0], false);
-        ButtonColorChange(ref SelectButton[1], true);
-        ButtonColorChange(ref SelectButton[2], false);
-        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible(new bool[] { false, true, false });
+        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible();
     }
     public void OnHingeStencilSpringSelectButtonPressed() {
-        ButtonColorChange(ref SelectButton[0], false);
-        ButtonColorChange(ref SelectButton[1], false);
-        ButtonColorChange(ref SelectButton[2], true);
-        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible(new bool[] { false, false, true });
+        ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible();
     }
     public void OnSelectEndButtonPressed() {
 

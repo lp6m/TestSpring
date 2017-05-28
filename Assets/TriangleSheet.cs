@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 //シミュレーションに用いる三角形シート
 public class TriangleSheet : MonoBehaviour {
+    private Main GameManagerMain;
     public GameObject forcePrefab;
     public GameObject VertexSpherePrefab;
     public GameObject EdgePrefab;
@@ -44,6 +45,7 @@ public class TriangleSheet : MonoBehaviour {
     public float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
     public List<float>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
     void Start() {
+        GameManagerMain = GameObject.Find("GameManager").GetComponent<Main>();
         timeCounter = delta;
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
         InitializeGameObjects(N);
@@ -519,7 +521,7 @@ public class TriangleSheet : MonoBehaviour {
     #region changeNaturalDuration
     public void ChangeSurfaceNaturalDuration(int[] vertindex) {
         //もし面選択モードでないなら変更しない
-        if (SelectedViewer.GetComponent<SelectedViewer>().AreaSpringSelectedVisible == false) return;
+        if (GameManagerMain.SelectButton[1].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
         try {
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
             SurfaceSpring_NaturalDurationArray[surfaceindex] = 2.0f;
@@ -560,9 +562,9 @@ public class TriangleSheet : MonoBehaviour {
     //選択している場所関連
     #region SelectedVisible 
 
-    public void ChangeSelectVisible(bool[] isvisible) {
+    public void ChangeSelectVisible() {
         if (SelectedViewer == null) return;
-        this.SelectedViewer.GetComponent<SelectedViewer>().ToggleVisible(isvisible);
+        this.SelectedViewer.GetComponent<SelectedViewer>().ToggleVisible();
     }
     #endregion
 

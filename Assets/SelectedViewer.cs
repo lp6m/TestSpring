@@ -4,10 +4,9 @@ using UnityEngine;
 
 //選択された場所を表示するためのオブジェクト
 public class SelectedViewer : MonoBehaviour {
-    public bool TwoPointSpringSelectedVisible = false;
-    public bool AreaSpringSelectedVisible = false;
-    public bool HingeStencilSpringSelectedVisible = false;
-    private bool[] oldSelectedVisibles = new bool[] { false, false, false };
+    private bool TwoPointSpringSelectedVisible = false;
+    private bool AreaSpringSelectedVisible = false;
+    private bool HingeStencilSpringSelectedVisible = false;
     public Material RedMaterial;
     public TriangleSheet sheet; //親オブジェクト
     private GameObject[] AreaGameObjects;
@@ -27,14 +26,11 @@ public class SelectedViewer : MonoBehaviour {
 	}
 	
     //表示するものを切り替える
-    public void ToggleVisible(bool[] isvisible){
-        oldSelectedVisibles[0] = TwoPointSpringSelectedVisible;
-        oldSelectedVisibles[1] = AreaSpringSelectedVisible;
-        oldSelectedVisibles[2] = HingeStencilSpringSelectedVisible;
-
-        TwoPointSpringSelectedVisible = isvisible[0];
-        AreaSpringSelectedVisible  = isvisible[1];
-        HingeStencilSpringSelectedVisible = isvisible[2];
+    public void ToggleVisible(){
+        GameObject[] toggle_buttons = GameObject.Find("GameManager").GetComponent<Main>().SelectButton;
+        TwoPointSpringSelectedVisible = toggle_buttons[0].GetComponent<UnityEngine.UI.Toggle>().isOn;
+        AreaSpringSelectedVisible = toggle_buttons[1].GetComponent<UnityEngine.UI.Toggle>().isOn;
+        HingeStencilSpringSelectedVisible = toggle_buttons[2].GetComponent<UnityEngine.UI.Toggle>().isOn;
         if (TwoPointSpringSelectedVisible) SetTwoPointSpringSelectedViewPosition();
         if (AreaSpringSelectedVisible) {
             //false->trueなので座標も再セット
@@ -53,7 +49,7 @@ public class SelectedViewer : MonoBehaviour {
     //このコードはなんとかしたほうがいい
     public void OnSimulateStopped() {
         //シミュレーションがストップしたときに選択状態を復元する
-        ToggleVisible(oldSelectedVisibles);
+        ToggleVisible();
     }
     //選択した場合に変更されるnaturalLengthに応じてMaterialを変更する
     public void changeAreaMaterial(int surfaceindex) {
