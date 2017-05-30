@@ -170,29 +170,5 @@ public class Main : MonoBehaviour {
     public void OnHingeStencilSpringSelectButtonPressed() {
         ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible();
     }
-    public void OnSelectEndButtonPressed() {
-
-    }
-
-    public void ButtonColorChange(ref GameObject b, bool active) {
-        if (active) {
-            ColorBlock cb = b.GetComponent<Button>().colors;
-            cb.normalColor = Color.red; cb.highlightedColor = Color.red;
-            b.GetComponent<Button>().colors = cb;
-        }
-        else {
-            ColorBlock cb = b.GetComponent<Button>().colors;
-            cb.normalColor = Color.white; cb.highlightedColor = Color.white;
-            b.GetComponent<Button>().colors = cb;
-        }
-    }
-    public void testButton() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < ManageSheet.GetComponent<TriangleSheet>().Hinge_NaturalDurationAarray[i].Count; j++) {
-                ManageSheet.GetComponent<TriangleSheet>().Hinge_NaturalDurationAarray[i][j] = 0;
-            }
-
-        }
-    }
     #endregion
 }
