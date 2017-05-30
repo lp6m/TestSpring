@@ -42,8 +42,10 @@ public class TriangleSheet : MonoBehaviour {
     //シミュレーションパラメータ
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
-    public float[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積
-    public List<float>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度
+    public int[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積のインデックス
+    private float[] SurfaceSpring_NaturalDurations = new float[] {0.5f, 1.0f, 2.0f, 3.0f};
+    public List<int>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度のインデックス
+    private int[] Hinge_NaturalDurations = new int[]{-180, -150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
     void Start() {
         GameManagerMain = GameObject.Find("GameManager").GetComponent<Main>();
         timeCounter = delta;
@@ -63,16 +65,20 @@ public class TriangleSheet : MonoBehaviour {
         Edges = new GameObject[2 * N * (N - 1) + (N - 1) * (N - 1) * 2];
         Surfaces = new GameObject[(N - 1) * (N - 1) * 2];
         ForceArrows = new GameObject[N * N];
-        SurfaceSpring_NaturalDurationArray = new float[2 * (N - 1) * (N - 1)];
-        Hinge_NaturalDurationAarray = new List<float>[3];
-        Hinge_NaturalDurationAarray[0] = new List<float>();
-        for (int i = 0; i < (N - 2) * (N - 1); i++) Hinge_NaturalDurationAarray[0].Add(0);
-        Hinge_NaturalDurationAarray[1] = new List<float>();
-        for (int i = 0; i < (N - 1) * (N - 2); i++) Hinge_NaturalDurationAarray[1].Add(0);
-        Hinge_NaturalDurationAarray[2] = new List<float>();
-        for (int i = 0; i < (N - 1) * (N - 1); i++) Hinge_NaturalDurationAarray[2].Add(0);
-        
-        for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) SurfaceSpring_NaturalDurationArray[i] = 1.0f;
+        Hinge_NaturalDurationAarray = new List<int>[3];
+        int default_hinge_naturalduration_index = -1;
+        for (int i = 0; i < Hinge_NaturalDurations.Length; i++) if (Hinge_NaturalDurations[i] == 0) default_hinge_naturalduration_index = i;
+        Hinge_NaturalDurationAarray[0] = new List<int>();
+        for (int i = 0; i < (N - 2) * (N - 1); i++) Hinge_NaturalDurationAarray[0].Add(default_hinge_naturalduration_index);
+        Hinge_NaturalDurationAarray[1] = new List<int>();
+        for (int i = 0; i < (N - 1) * (N - 2); i++) Hinge_NaturalDurationAarray[1].Add(default_hinge_naturalduration_index);
+        Hinge_NaturalDurationAarray[2] = new List<int>();
+        for (int i = 0; i < (N - 1) * (N - 1); i++) Hinge_NaturalDurationAarray[2].Add(default_hinge_naturalduration_index);
+
+        SurfaceSpring_NaturalDurationArray = new int[2 * (N - 1) * (N - 1)];
+        int default_surface_naturalduration_index = -1; //1.0fになってるインデックスを探す
+        for (int i = 0; i < SurfaceSpring_NaturalDurations.Length; i++) if (SurfaceSpring_NaturalDurations[i] == 1.0f) default_surface_naturalduration_index = i;
+        for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) SurfaceSpring_NaturalDurationArray[i] = default_surface_naturalduration_index;
 
         #region MakeVertices
         //頂点の作成
@@ -382,7 +388,7 @@ public class TriangleSheet : MonoBehaviour {
                 int surfaceindex = GetSurfaceIndex(i, rj_index, rk_index);
                 SurfaceScript ss = Surfaces[surfaceindex].GetComponent<SurfaceScript>();
                 //(S - s0)かける
-                res *= (ss.now_area - ss.natural_area * SurfaceSpring_NaturalDurationArray[surfaceindex]);
+                res *= (ss.now_area - ss.natural_area * SurfaceSpring_NaturalDurations[SurfaceSpring_NaturalDurationArray[surfaceindex]]);
                 force += res;
             }
             //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force * SpringConstant;
@@ -435,10 +441,10 @@ public class TriangleSheet : MonoBehaviour {
                 //dphi/dtheta = (2) * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
                 int hinge_index = (N - 1) * (i - 1) + (j + 1) - 1;
-                force_array[x0] += hf.f0 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
-                force_array[x1] += hf.f1 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
-                force_array[x2] += hf.f2 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
-                force_array[x3] += hf.f3 * -1 * (hf.theta - Hinge_NaturalDurationAarray[0][hinge_index]);
+                force_array[x0] += hf.f0 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[0][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x1] += hf.f1 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[0][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x2] += hf.f2 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[0][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x3] += hf.f3 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[0][hinge_index]] * Mathf.PI / 180.0f));
             }
         }
         //左上ヒンジ(N-1)*(N-2)
@@ -453,10 +459,10 @@ public class TriangleSheet : MonoBehaviour {
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
                 int hinge_index = (N - 2) * i + j - 1;
-                force_array[x0] += hf.f0 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
-                force_array[x1] += hf.f1 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
-                force_array[x2] += hf.f2 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
-                force_array[x3] += hf.f3 * -1 * (hf.theta - Hinge_NaturalDurationAarray[1][hinge_index]);
+                force_array[x0] += hf.f0 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[1][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x1] += hf.f1 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[1][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x2] += hf.f2 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[1][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x3] += hf.f3 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[1][hinge_index]] * Mathf.PI / 180.0f));
             }
         }
         //右上ヒンジ(N-1)*(N-1)
@@ -471,10 +477,10 @@ public class TriangleSheet : MonoBehaviour {
                 //dphi/dtheta = 2 * springconstant * (theta_i - theta_natural) springconstantは最後にかける
                 //-1忘れるとバグる
                 int hinge_index = (N - 1) * i + j;
-                force_array[x0] += hf.f0 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
-                force_array[x1] += hf.f1 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
-                force_array[x2] += hf.f2 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
-                force_array[x3] += hf.f3 * -1 * (hf.theta - Hinge_NaturalDurationAarray[2][hinge_index]);
+                force_array[x0] += hf.f0 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[2][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x1] += hf.f1 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[2][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x2] += hf.f2 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[2][hinge_index]] * Mathf.PI / 180.0f));
+                force_array[x3] += hf.f3 * -1 * (hf.theta - ((float)Hinge_NaturalDurations[Hinge_NaturalDurationAarray[2][hinge_index]] * Mathf.PI / 180.0f));
             }
         }
         //force_arrayが崩壊した場合はエラーフラグを立てて終了
@@ -524,7 +530,8 @@ public class TriangleSheet : MonoBehaviour {
         if (GameManagerMain.SelectButton[1].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
         try {
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
-            SurfaceSpring_NaturalDurationArray[surfaceindex] = 2.0f;
+            //コンボボックスで選択した自然長にする
+            SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.SurfaceSpringNaturalDropdown.value;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeAreaMaterial(surfaceindex);
         }
         catch (ArgumentOutOfRangeException ex) {
@@ -534,8 +541,7 @@ public class TriangleSheet : MonoBehaviour {
     public void ChangeHingeNaturalDuration(int[] vertindex) {
         //もしヒンジ選択モードでないなら変更しない
         if (GameManagerMain.SelectButton[2].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
-        float angle = 90.0f;//この角度に変更する
-        float change_angle_radian = angle * Mathf.PI / 180.0f;
+        //コンボボックスで選択した角度に変更する
         //まずどのタイプのヒンジか調べる必要がある
         Array.Sort(vertindex);
         int h = vertindex[0] / N;
@@ -543,21 +549,21 @@ public class TriangleSheet : MonoBehaviour {
         if (vertindex[0] + N - 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + 2 * N - 1 == vertindex[3]) {
             //ヒンジタイプA
             int hinge_index = (N - 1) * h + w - 1;
-            Hinge_NaturalDurationAarray[0][hinge_index] = change_angle_radian;
+            Hinge_NaturalDurationAarray[0][hinge_index] = GameManagerMain.HingeNaturalBendangleDropdown.value;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(0, hinge_index);
             return;
         }
         if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N - 1 == vertindex[2] && vertindex[0] + N == vertindex[3]) {
             //ヒンジタイプB
             int hinge_index = (N - 2) * h + w - 1;
-            Hinge_NaturalDurationAarray[1][hinge_index] = change_angle_radian;
+            Hinge_NaturalDurationAarray[1][hinge_index] = GameManagerMain.HingeNaturalBendangleDropdown.value;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(1, hinge_index);
             return;
         }
         if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + N + 1 == vertindex[3]) {
             //ヒンジタイプC
             int hinge_index = (N - 1) * h + w;
-            Hinge_NaturalDurationAarray[2][hinge_index] = change_angle_radian;
+            Hinge_NaturalDurationAarray[2][hinge_index] = GameManagerMain.HingeNaturalBendangleDropdown.value;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, hinge_index);
             return;
         }

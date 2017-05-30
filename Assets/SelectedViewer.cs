@@ -11,6 +11,8 @@ public class SelectedViewer : MonoBehaviour {
     public GameObject EdgePrefab;
     public Material RedMaterial;
     public Material ArrowMaterial;
+    public Material[] AreaMaterials; //2.0, 3.0 0.5
+    public Material[] HingeMaterials;//30,60,90,120,150,180, -180,-150,-120,-90,-60,-30,
     public TriangleSheet sheet; //親オブジェクト
     private GameObject[] AreaGameObjects; //選択した面を表示するためのオブジェクト
     private GameObject[] HingeGameObjects; //選択したヒンジを表示するためのオブジェクト
@@ -104,11 +106,14 @@ public class SelectedViewer : MonoBehaviour {
     }
     //選択した場合に変更されるnaturalLengthに応じてMaterialを変更する
     public void changeAreaMaterial(int surfaceindex) {
-        if (sheet.SurfaceSpring_NaturalDurationArray[surfaceindex] != 1.0f) {
-            AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = RedMaterial;
+        int duration_index = sheet.SurfaceSpring_NaturalDurationArray[surfaceindex];
+        if (duration_index != 0) {
+            //面積x2.0, x3.0, x0.5
+            AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[duration_index - 1];
             if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
         }
         else {
+            //面積x1.0
             AreaGameObjects[surfaceindex].SetActive(false);
         }
     }
