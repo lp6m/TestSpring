@@ -14,6 +14,11 @@ public class SelectedViewer : MonoBehaviour {
     public TriangleSheet sheet; //親オブジェクト
     private GameObject[] AreaGameObjects; //選択した面を表示するためのオブジェクト
     private GameObject[] HingeGameObjects; //選択したヒンジを表示するためのオブジェクト
+
+    void OnDestroy() {
+        foreach (var g in AreaGameObjects) if (g != null) Destroy(g);
+        foreach (var g in HingeGameObjects) if (g != null) Destroy(g);
+    }
 	// Use this for initialization
 	void Start () {
         GameManagerMain = GameObject.Find("GameManager").GetComponent<Main>();

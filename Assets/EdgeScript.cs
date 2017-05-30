@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class EdgeScript : MonoBehaviour {
-    
+
     public GameObject sphere1;
     public GameObject sphere2;
     public float naturallength;
@@ -15,6 +15,10 @@ public class EdgeScript : MonoBehaviour {
     }
 	void Start () {
         
+    }
+    public void OnDestroy() {
+        if (sphere1 != null) Destroy(sphere1);
+        if (sphere2 != null) Destroy(sphere2);
     }
     //現在の長さは外部から呼ばれたときにはじめて再計算される
 	public void CalcNowLength() {

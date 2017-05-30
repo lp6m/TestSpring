@@ -16,4 +16,7 @@ public class ForceArrow : MonoBehaviour {
         line.SetPosition(0, nekko.transform.position);
         line.SetPosition(1, nekko.transform.position + arrowvec);
     }
+    void OnDestroy() {
+        if(nekko != null) GameObject.Destroy(nekko);
+    }
 }

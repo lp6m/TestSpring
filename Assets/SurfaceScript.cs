@@ -16,6 +16,11 @@ public class SurfaceScript : MonoBehaviour {
     void Start() {
 
     }
+    void OnDestroy() {
+        if (sphere1 != null) Destroy(sphere1);
+        if (sphere2 != null) Destroy(sphere2);
+        if (sphere3 != null) Destroy(sphere3);
+    }
     //現在の長さは外部から呼ばれたときにはじめて再計算される
     public void CalcNowArea() {
         if (sphere1 == null || sphere2 == null || sphere3 == null) return;
