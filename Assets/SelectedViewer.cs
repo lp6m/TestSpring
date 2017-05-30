@@ -11,7 +11,7 @@ public class SelectedViewer : MonoBehaviour {
     public GameObject EdgePrefab;
     public Material RedMaterial;
     public Material ArrowMaterial;
-    public Material[] AreaMaterials; //2.0, 3.0 0.5
+    public Material[] AreaMaterials; //0.5 2.0, 3.0
     public Material[] HingeMaterials;//30,60,90,120,150,180, -180,-150,-120,-90,-60,-30,
     public TriangleSheet sheet; //親オブジェクト
     private GameObject[] AreaGameObjects; //選択した面を表示するためのオブジェクト
@@ -107,14 +107,22 @@ public class SelectedViewer : MonoBehaviour {
     //選択した場合に変更されるnaturalLengthに応じてMaterialを変更する
     public void changeAreaMaterial(int surfaceindex) {
         int duration_index = sheet.SurfaceSpring_NaturalDurationArray[surfaceindex];
-        if (duration_index != 0) {
-            //面積x2.0, x3.0, x0.5
-            AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[duration_index - 1];
-            if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
-        }
-        else {
-            //面積x1.0
-            AreaGameObjects[surfaceindex].SetActive(false);
+        switch (duration_index) {
+            case 0: //0.5
+                AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[0];
+                if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
+                break;
+            case 1: //1.0
+                AreaGameObjects[surfaceindex].SetActive(false);
+                break;
+            case 2: //2.0
+                AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[1];
+                if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
+                break;
+            case 3: //3.0
+                AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[2];
+                if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
+                break;
         }
     }
     //選択した場合に変更されるnaturalBendAngleに応じてMaterialを変更する
@@ -123,12 +131,15 @@ public class SelectedViewer : MonoBehaviour {
         int hingegameobject_index = hinge_index;
         if (hinge_type >= 1) hingegameobject_index += (sheet.N - 2) * (sheet.N - 1);
         if (hinge_type >= 2) hingegameobject_index += (sheet.N - 1) * (sheet.N - 2);
-        if (sheet.Hinge_NaturalDurationAarray[hinge_type][hinge_index] != 0f) {
-            HingeGameObjects[hingegameobject_index].GetComponent<EdgeScript>().changeMaterial(ArrowMaterial);
-            if (this.sheet.issimulating == false) HingeGameObjects[hingegameobject_index].SetActive(true);
-        }
-        else {
+        int duration_index = sheet.Hinge_NaturalDurationAarray[hinge_type][hinge_index];
+        if (duration_index == 6) { //0度
             HingeGameObjects[hingegameobject_index].SetActive(false);
+        }else if(duration_index <= 5){
+            HingeGameObjects[hingegameobject_index].GetComponent<EdgeScript>().changeMaterial(HingeMaterials[duration_index]);
+            if (this.sheet.issimulating == false) HingeGameObjects[hingegameobject_index].SetActive(true);
+        }else {
+            HingeGameObjects[hingegameobject_index].GetComponent<EdgeScript>().changeMaterial(HingeMaterials[duration_index - 1]);
+            if (this.sheet.issimulating == false) HingeGameObjects[hingegameobject_index].SetActive(true);
         }
     }
 	// Update is called once per frame
