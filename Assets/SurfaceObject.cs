@@ -95,6 +95,8 @@ public class SurfaceObject : MonoBehaviour {
         if (Input.GetMouseButtonDown(0)) {
             this.sheet.ChangeSurfaceNaturalDuration(hitindex);
         }
+        #endregion
+        #region TouchHinge
         Vector3 hitpos = hit.point;
         int surfaceindex = this.sheet.GetSurfaceIndex(hitindex[0], hitindex[1], hitindex[2]);
         int nearest_surface_point = surfaceindex; //今選択している三角形の周囲3つのうちマウスの当たった点から一番ちかい三角形を構成するために必要な点
@@ -133,6 +135,8 @@ public class SurfaceObject : MonoBehaviour {
             }
         }
         int[] quad_index_array = { nearest_surface_point, hitindex[0], hitindex[1], hitindex[2] };
+        //N=2のときは例外処理(0,1,2,3)のみにする
+        if (this.sheet.N == 2) quad_index_array = new int[] { 0, 1, 2, 3 };
         try {
             Array.Sort(quad_index_array);
             glmanage.q0 = VertexList[quad_index_array[0]];

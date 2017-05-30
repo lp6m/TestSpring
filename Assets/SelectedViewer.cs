@@ -16,8 +16,8 @@ public class SelectedViewer : MonoBehaviour {
     private GameObject[] HingeGameObjects; //選択したヒンジを表示するためのオブジェクト
 
     void OnDestroy() {
-        foreach (var g in AreaGameObjects) if (g != null) Destroy(g);
-        foreach (var g in HingeGameObjects) if (g != null) Destroy(g);
+        if (AreaGameObjects != null) foreach (var g in AreaGameObjects) if (g != null) Destroy(g);
+        if (HingeGameObjects != null) foreach (var g in HingeGameObjects) if (g != null) Destroy(g);
     }
 	// Use this for initialization
 	void Start () {
@@ -27,9 +27,9 @@ public class SelectedViewer : MonoBehaviour {
         AreaGameObjects = new GameObject[2 * (sheet.N - 1) * (sheet.N - 1)];
         for (int i = 0; i < AreaGameObjects.Length; i++) {
             AreaGameObjects[i] = new GameObject();
+            AreaGameObjects[i].name = "AreaGameObject";
             AreaGameObjects[i].AddComponent<MeshRenderer>();
             AreaGameObjects[i].AddComponent<MeshFilter>();
-            AreaGameObjects[i].AddComponent<Renderer>();
             //はじめは表示しない
             AreaGameObjects[i].SetActive(false);
         }
