@@ -79,11 +79,11 @@ public class Main : MonoBehaviour {
         ManageSheet.GetComponent<TriangleSheet>().ToggleSimulate();
         if (ManageSheet.GetComponent<TriangleSheet>().issimulating) {
             this.StartStopButtonText.text = "Stop";
-            for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(false);
+            //for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(false);
         }
         else {
             this.StartStopButtonText.text = "Start";
-            for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(true);
+            //for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(true);
         }
     }
     public void OnParamResetButtonPressed() {
