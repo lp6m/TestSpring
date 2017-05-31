@@ -144,7 +144,7 @@ public class SelectedViewer : MonoBehaviour {
     }
 	// Update is called once per frame
 	void Update () {
-		
+		UpdateAreaSpringSelectedVisibleViewPosition();
     }
 
     //表示切替された際は座標を変更する（シミュレーション中も表示するならUpdateでこれをよぶようにする）
@@ -172,6 +172,25 @@ public class SelectedViewer : MonoBehaviour {
             AreaGameObjects[i].GetComponent<MeshFilter>().sharedMesh = tmpMesh;
         }
     }
+	private void UpdateAreaSpringSelectedVisibleViewPosition(){
+		Vector3 x = new Vector3 (0, 1.0f, 0);
+		for (int i = 0; i < AreaGameObjects.Length; i++) {
+			if (i % 2 == 0) {
+				//(k, k+1, k+N)のtriangle
+				int tmp = i / 2;
+				int k = sheet.N * (tmp / (sheet.N - 1)) + (tmp % (sheet.N - 1));
+				AreaGameObjects[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { sheet.Vertices[k].transform.position + x, sheet.Vertices[k + 1].transform.position + x, sheet.Vertices[k + sheet.N].transform.position + x};
+			}
+			else {
+				//(k, k+N, k+N-1)のtriangle
+				int tmp = (i - 1) / 2;
+				int k = sheet.N * (tmp / (sheet.N - 1)) + (tmp % (sheet.N - 1)) + 1;
+				AreaGameObjects[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { sheet.Vertices[k].transform.position + x, sheet.Vertices[k + sheet.N - 1].transform.position + x, sheet.Vertices[k + sheet.N].transform.position  + x};
+			}
+			AreaGameObjects[i].GetComponent<MeshFilter>().mesh.RecalculateNormals();
+			AreaGameObjects[i].GetComponent<MeshFilter>().mesh.RecalculateBounds();
+		}
+	}
     private void SetHingeStencilSpringSelectedVisiblePosition() {
         //ヒンジの表示はTriangleSheetのEdgeを利用しているので点が動けばEdgeScript.csのUpdate()内で勝手に座標更新されるので何もしなくていい
     }
