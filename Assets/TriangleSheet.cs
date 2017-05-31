@@ -542,6 +542,8 @@ public class TriangleSheet : MonoBehaviour {
 
     #region changeNaturalDuration
     public void ChangeSurfaceNaturalDuration(int[] vertindex) {
+		//もしpaintモードでないなら変更しない
+		if (GameManagerMain.IsPaintMode == false) return;
         //もし面選択モードでないなら変更しない
         if (GameManagerMain.SelectButton[1].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
         try {
@@ -555,6 +557,8 @@ public class TriangleSheet : MonoBehaviour {
         }
     }
     public void ChangeHingeNaturalDuration(int[] vertindex) {
+		//もしpaintモードでないなら変更しない
+		if (GameManagerMain.IsPaintMode == false) return;
         //もしヒンジ選択モードでないなら変更しない
         if (GameManagerMain.SelectButton[2].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
         //コンボボックスで選択した角度に変更する

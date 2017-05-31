@@ -144,6 +144,7 @@ public class SelectedViewer : MonoBehaviour {
     }
 	// Update is called once per frame
 	void Update () {
+		
     }
 
     //表示切替された際は座標を変更する（シミュレーション中も表示するならUpdateでこれをよぶようにする）

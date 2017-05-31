@@ -55,8 +55,8 @@ public class CameraControlByMouse : MonoBehaviour {
             }
         }
         //モバイルかつペイントモードならカメラ移動無効に
-        /*var mainsyscomp = GameObject.Find("MainSystem").GetComponent<MainSystem>();
-        if (mainsyscomp.ismobile == true && mainsyscomp.ispaintmode == true) return;*/
+        var mainsyscomp = GameObject.Find("GameManager").GetComponent<Main>();
+		if (mainsyscomp.IsPaintMode) return;
         // マウス関係のイベントを関数にまとめる
         this.mouseEvent();
 
