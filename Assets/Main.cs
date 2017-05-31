@@ -90,7 +90,7 @@ public class Main : MonoBehaviour {
         XSlider.value = YSlider.value = ZSlider.value = 0;
         SpringConstantSliders[0].value = 0.2f;
         SpringConstantSliders[1].value = 0.2f;
-        SpringConstantSliders[2].value = 10.0f;
+        SpringConstantSliders[2].value = 50.0f;
 
         DeltaSlider.value = 0.001f;
         OnSpringConstantSlider1Changed();
@@ -100,6 +100,7 @@ public class Main : MonoBehaviour {
         OnXSliderChanged();
         OnYSliderChanged();
         OnZSliderChanged();
+		ManageSheet.GetComponent<TriangleSheet> ().DurationReset ();
     }
     public void OnPositionResetButtonPressed() {
         ManageSheet.GetComponent<TriangleSheet>().PositionReset();

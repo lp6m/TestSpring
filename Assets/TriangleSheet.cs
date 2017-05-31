@@ -52,7 +52,23 @@ public class TriangleSheet : MonoBehaviour {
         ExternalForce = new Vector3(0.0f, 0.0f, 0.0f);
         InitializeGameObjects(N);
     }
+	public void DurationReset(){
+		Hinge_NaturalDurationAarray = new List<int>[3];
+		int default_hinge_naturalduration_index = -1;
+		for (int i = 0; i < Hinge_NaturalDurations.Length; i++) if (Hinge_NaturalDurations[i] == 0) default_hinge_naturalduration_index = i;
+		Hinge_NaturalDurationAarray[0] = new List<int>();
+		for (int i = 0; i < (N - 2) * (N - 1); i++) Hinge_NaturalDurationAarray[0].Add(default_hinge_naturalduration_index);
+		Hinge_NaturalDurationAarray[1] = new List<int>();
+		for (int i = 0; i < (N - 1) * (N - 2); i++) Hinge_NaturalDurationAarray[1].Add(default_hinge_naturalduration_index);
+		Hinge_NaturalDurationAarray[2] = new List<int>();
+		for (int i = 0; i < (N - 1) * (N - 1); i++) Hinge_NaturalDurationAarray[2].Add(default_hinge_naturalduration_index);
 
+		SurfaceSpring_NaturalDurationArray = new int[2 * (N - 1) * (N - 1)];
+		int default_surface_naturalduration_index = -1; //1.0fになってるインデックスを探す
+		for (int i = 0; i < SurfaceSpring_NaturalDurations.Length; i++) if (SurfaceSpring_NaturalDurations[i] == 1.0f) default_surface_naturalduration_index = i;
+		for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) SurfaceSpring_NaturalDurationArray[i] = default_surface_naturalduration_index;
+		this.SelectedViewer.GetComponent<SelectedViewer> ().ToggleVisible ();
+	}
     void InitializeGameObjects(int changeN) {
         N = changeN;
         if (Vertices != null) foreach (GameObject g in Vertices) Destroy(g);
