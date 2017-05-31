@@ -546,6 +546,13 @@ public class TriangleSheet : MonoBehaviour {
         Array.Sort(vertindex);
         int h = vertindex[0] / N;
         int w = vertindex[0] % N;
+		//N=2のときだけ例外処理
+		if (N == 2) {
+			//ヒンジタイプC
+			Hinge_NaturalDurationAarray[2][0] = GameManagerMain.HingeNaturalBendangleDropdown.value;
+			this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, 0);
+			return;
+		}
         if (vertindex[0] + N - 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + 2 * N - 1 == vertindex[3]) {
             //ヒンジタイプA
             int hinge_index = (N - 1) * h + w - 1;
