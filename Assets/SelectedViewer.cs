@@ -82,7 +82,7 @@ public class SelectedViewer : MonoBehaviour {
             for (int i = 0; i < AreaGameObjects.Length; i++) changeAreaMaterial(i);
         }
         else {
-            foreach (var g in AreaGameObjects) g.SetActive(false);
+            //foreach (var g in AreaGameObjects) g.SetActive(false);
         }
         if (HingeStencilSpringSelectedVisible) {
             //false->trueなので座標も再セット
@@ -92,12 +92,12 @@ public class SelectedViewer : MonoBehaviour {
             for (int i = 0; i < (sheet.N - 1) * (sheet.N - 1); i++) changeHingeMaterial(2, i);
         }
         else {
-            foreach (var g in HingeGameObjects) g.SetActive(false);
+            //foreach (var g in HingeGameObjects) g.SetActive(false);
         }
     }
     //すべて非表示にする シミュレーションがスタートしたとき
     public void AllSelectedDisable() {
-        foreach (var g in AreaGameObjects) g.SetActive(false);
+        //foreach (var g in AreaGameObjects) g.SetActive(false);
     }
     //このコードはなんとかしたほうがいい
     public void OnSimulateStopped() {

@@ -14,7 +14,6 @@ public class Main : MonoBehaviour {
     public Text[] SpringConstantTexts;
     public GameObject[] SelectButton;
     #endregion
-    
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
     private Vector3 ExternalForce;
     public float delta;
