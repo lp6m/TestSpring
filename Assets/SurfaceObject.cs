@@ -92,7 +92,7 @@ public class SurfaceObject : MonoBehaviour {
         glmanage.p0 = VertexList[hitindex[0]];
         glmanage.p1 = VertexList[hitindex[1]];
         glmanage.p2 = VertexList[hitindex[2]];
-        if (Input.GetMouseButtonDown(0)) {
+        if (Input.GetMouseButton(0)) {
             this.sheet.ChangeSurfaceNaturalDuration(hitindex);
         }
         #endregion
