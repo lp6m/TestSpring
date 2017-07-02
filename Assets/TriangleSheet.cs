@@ -99,7 +99,7 @@ public class TriangleSheet : MonoBehaviour {
         #region MakeVertices
         //頂点の作成
         //(1,0) (0,1)→(1,0)(1/2,√3/2)の射交座標へ変換すると正方形が正三角形2つの平行四辺形になる
-        double basecenter = N * SphereInterval / 2.0;
+        double basecenter = (N-1) * SphereInterval / 2.0;
         double centerx = basecenter + basecenter / 2.0;
         double centerz = basecenter * Math.Sqrt(3) / 2.0;
         for (int i = 0; i < N * N; i++) {
@@ -524,7 +524,7 @@ public class TriangleSheet : MonoBehaviour {
     public void PositionReset() {
         //頂点のリセット
         //(1,0) (0,1)→(1,0)(1/2,√3/2)の射交座標へ変換すると正方形が正三角形2つの平行四辺形になる
-        double basecenter = N * SphereInterval / 2.0;
+        double basecenter = (N-1) * SphereInterval / 2.0;
         double centerx = basecenter + basecenter / 2.0;
         double centerz = basecenter * Math.Sqrt(3) / 2.0;
         for (int i = 0; i < N * N; i++) {
