@@ -21,6 +21,8 @@ public class GLManage : MonoBehaviour {
 
     //UnityシステムからRender時に呼び出されるメソッド.ここでGL描画を呼び出す必要がある. GameView用
     void OnPostRender() {
+        GameObject sheet = GameObject.Find("TriangleSheet");
+        if (sheet != null && sheet.GetComponent<TriangleSheet>().issimulating) return;
         DrawTriangle(p0, p1, p2, Color.red, RedMaterial);
         DrawQuad(q0, q1, q2, q3, Color.blue, BlueMaterial);
     }

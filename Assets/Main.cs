@@ -24,6 +24,7 @@ public class Main : MonoBehaviour {
     // Use this for initialization
     void Start () {
         ManageSheet = Instantiate(TriangleSheetPrefab);
+        ManageSheet.name = "TriangleSheet";
         //GUI初期化
         GUIInitialize();
 	}
