@@ -14,6 +14,8 @@ public class Main : MonoBehaviour {
     public Text[] SpringConstantTexts;
     public GameObject[] SelectButton;
 	public Text CamMoveOrPaintToggleText;
+    public GameObject SettingsPanel;
+    public GameObject PaintPanel;
     #endregion
 	public bool IsPaintMode = false; //PaintModeならカメラは移動しないがかける PaintModeでないならカメラは移動するがかけない
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
@@ -173,7 +175,18 @@ public class Main : MonoBehaviour {
     public void OnHingeStencilSpringSelectButtonPressed() {
         ManageSheet.GetComponent<TriangleSheet>().ChangeSelectVisible();
     }
-
+    public void OpenSettingsButtonPressed() {
+        SettingsPanel.SetActive(true);
+    }
+    public void CloseSettingsButtonPressed() {
+        SettingsPanel.SetActive(false);
+    }
+    public void OpenPaintButtonPressed() {
+        PaintPanel.SetActive(true);
+    }
+    public void ClosePaintButtonPressed() {
+        PaintPanel.SetActive(false);
+    }
 	public void OnCamMoveOrPaintTogglePressed(){
 		IsPaintMode = !IsPaintMode;
 		if (IsPaintMode)
