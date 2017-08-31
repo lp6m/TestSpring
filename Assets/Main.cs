@@ -5,7 +5,8 @@ public class Main : MonoBehaviour {
     #region GUIComponent
     public Slider XSlider, YSlider, ZSlider, DeltaSlider, NSlider;
     public Text XValText, YValText, ZValText,DeltaSliderText;
-    public Text StartStopButtonText, NText;
+    public Text NText;//StartStopButtonText,
+    public Button StartStopButton;
     public Dropdown HingeNaturalBendangleDropdown, SurfaceSpringNaturalDropdown;
     public Toggle toggle1, toggle2, toggle3;
     public Slider SpeedSlider1, SpeedSlider2, SpeedSlider3;
@@ -16,6 +17,8 @@ public class Main : MonoBehaviour {
 	public Text CamMoveOrPaintToggleText;
     public GameObject SettingsPanel;
     public GameObject PaintPanel;
+    public Sprite StartSprite;
+    public Sprite StopSprite;
     #endregion
 	public bool IsPaintMode = false; //PaintModeならカメラは移動しないがかける PaintModeでないならカメラは移動するがかけない
     public float MaxForceSizeXYZ, MinForceSizeXYZ, SpringConstant;
@@ -82,11 +85,15 @@ public class Main : MonoBehaviour {
     public void OnStartStopButtonPressed() {
         ManageSheet.GetComponent<TriangleSheet>().ToggleSimulate();
         if (ManageSheet.GetComponent<TriangleSheet>().issimulating) {
-            this.StartStopButtonText.text = "Stop";
+            this.StartStopButton.interactable = true;
+            this.StartStopButton.GetComponent<Image>().sprite = StopSprite;
+            //this.StartStopButtonText.text = "Stop";
             //for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(false);
         }
         else {
-            this.StartStopButtonText.text = "Start";
+            this.StartStopButton.interactable = true;
+            this.StartStopButton.GetComponent<Image>().sprite = StartSprite;
+            //this.StartStopButtonText.text = "Start";
             //for (int i = 0; i < 3; i++) this.SelectButton[i].SetActive(true);
         }
     }
