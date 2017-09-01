@@ -188,12 +188,6 @@ public class Main : MonoBehaviour {
     public void CloseSettingsButtonPressed() {
         SettingsPanel.SetActive(false);
     }
-    public void OpenPaintButtonPressed() {
-        PaintPanel.SetActive(true);
-    }
-    public void ClosePaintButtonPressed() {
-        PaintPanel.SetActive(false);
-    }
 	public void OnCamMoveOrPaintTogglePressed(){
 		IsPaintMode = !IsPaintMode;
 		if (IsPaintMode)
@@ -201,5 +195,20 @@ public class Main : MonoBehaviour {
 		else
 			CamMoveOrPaintToggleText.text = "paint";
 	}
+    public void OpenPaintButtonPressed() {
+        PaintPanel.SetActive(true);
+        //TriangleSheetを作成してパネルより手前に配置
+        GameObject PaintPanelSheet = Instantiate(TriangleSheetPrefab);
+        PaintPanelSheet.name = "PaintPanelSheet";
+        GameObject Canvas = GameObject.Find("Canvas");
+        //PaintPanelSheet.transform.LookAt(Canvas.transform);
+        PaintPanelSheet.transform.rotation = Canvas.transform.rotation;
+        Vector3 nowPos = PaintPanelSheet.transform.position;
+        PaintPanelSheet.transform.position = Canvas.transform.position;
+    }
+    public void ClosePaintButtonPressed() {
+        PaintPanel.SetActive(false);
+        //Paintパネルに塗られたTrianleSheetから色塗りデータを取得
+    }
     #endregion
 }

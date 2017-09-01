@@ -105,10 +105,11 @@ public class TriangleSheet : MonoBehaviour {
         for (int i = 0; i < N * N; i++) {
             int h = i / N; int w = i % N;
             Vertices[i] = Instantiate(VertexSpherePrefab);
+            Vertices[i].transform.parent = this.gameObject.transform;
             double basex = h * SphereInterval; double basey = w * SphereInterval;
             double posx = basex + basey / 2.0;
             double posz = basey * Math.Sqrt(3) / 2.0;
-            Vertices[i].transform.position = new Vector3((float)(posx - centerx), 0, (float)(posz - centerz));
+            Vertices[i].transform.localPosition = new Vector3((float)(posx - centerx), 0, (float)(posz - centerz));
         }
         #endregion
         #region MakeEdges
@@ -117,6 +118,7 @@ public class TriangleSheet : MonoBehaviour {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N - 1; j++) {
                 Edges[edgecnt] = Instantiate(EdgePrefab);
+                Edges[edgecnt].transform.parent = this.gameObject.transform;
                 EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
                 es.sphere1 = Vertices[i * N + j];
                 es.sphere2 = Vertices[i * N + j + 1];
@@ -129,6 +131,7 @@ public class TriangleSheet : MonoBehaviour {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N - 1; j++) {
                 Edges[edgecnt] = Instantiate(EdgePrefab);
+                Edges[edgecnt].transform.parent = this.gameObject.transform;
                 EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
                 es.sphere1 = Vertices[j * N + i];
                 es.sphere2 = Vertices[(j + 1) * N + i];
@@ -141,6 +144,7 @@ public class TriangleSheet : MonoBehaviour {
         for (int i = 0; i < N - 1; i++) {
             for (int j = 0; j < N - 1; j++) {
                 Edges[edgecnt] = Instantiate(EdgePrefab);
+                Edges[edgecnt].transform.parent = this.gameObject.transform;
                 EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
                 es.sphere1 = Vertices[i * N + j];
                 es.sphere2 = Vertices[(i + 1) * N + (j + 1)];
@@ -154,6 +158,7 @@ public class TriangleSheet : MonoBehaviour {
         for (int i = 0; i < N - 1; i++) {
             for (int j = 1; j < N; j++) {
                 Edges[edgecnt] = Instantiate(EdgePrefab);
+                Edges[edgecnt].transform.parent = this.gameObject.transform;
                 EdgeScript es = Edges[edgecnt].GetComponent<EdgeScript>();
                 es.sphere1 = Vertices[i * N + j];
                 es.sphere2 = Vertices[(i + 1) * N + (j - 1)];
@@ -166,6 +171,7 @@ public class TriangleSheet : MonoBehaviour {
         #region MakeSurfaces
         for (int i = 0; i < (N - 1) * (N - 1) * 2; i++) {
             Surfaces[i] = Instantiate(SurfacePrefab);
+            Surfaces[i].transform.parent = this.gameObject.transform;
             SurfaceScript ss = Surfaces[i].GetComponent<SurfaceScript>();
             if (i % 2 == 0) {
                 //(k, k+1, k+N)のtriangle
@@ -191,19 +197,22 @@ public class TriangleSheet : MonoBehaviour {
         //頂点にかかる力を表す矢印
         for (int i = 0; i < N * N; i++) {
             ForceArrows[i] = Instantiate(forcePrefab);
+            ForceArrows[i].transform.parent = this.gameObject.transform;
             ForceArrows[i].GetComponent<ForceArrow>().nekko = Vertices[i];
         }
         #endregion
         #region SetSurfaceObject
         //面をもつオブジェクトに座標を設定する
         if (SurfaceGameObject != null) Destroy(SurfaceGameObject);
-        SurfaceGameObject = Instantiate(SurfaceObjectPrefab); 
+        SurfaceGameObject = Instantiate(SurfaceObjectPrefab);
+        SurfaceGameObject.transform.parent = this.gameObject.transform;
         SurfaceGameObject.GetComponent<SurfaceObject>().UpdateMesh(Vertices);
         SurfaceGameObject.GetComponent<SurfaceObject>().sheet = this;
         #endregion
         #region SetSelectedViewer
         if (SelectedViewer != null) Destroy(SelectedViewer);
         SelectedViewer = Instantiate(SelectedViewerPrefab);
+        SelectedViewer.transform.parent = this.gameObject.transform;
         SelectedViewer.GetComponent<SelectedViewer>().sheet = this;
 
         #endregion

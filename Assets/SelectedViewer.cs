@@ -30,6 +30,7 @@ public class SelectedViewer : MonoBehaviour {
         for (int i = 0; i < AreaGameObjects.Length; i++) {
             AreaGameObjects[i] = new GameObject();
             AreaGameObjects[i].name = "AreaGameObject";
+            AreaGameObjects[i].transform.parent = sheet.transform;
             AreaGameObjects[i].AddComponent<MeshRenderer>();
             AreaGameObjects[i].AddComponent<MeshFilter>();
             //はじめは表示しない
@@ -39,6 +40,7 @@ public class SelectedViewer : MonoBehaviour {
         HingeGameObjects = new GameObject[2 * (sheet.N - 2) * (sheet.N - 1) + (sheet.N - 1) * (sheet.N - 1)];
         for (int i = 0; i < HingeGameObjects.Length; i++) {
             HingeGameObjects[i] = Instantiate(EdgePrefab);
+            HingeGameObjects[i].transform.parent = sheet.transform;
             HingeGameObjects[i].GetComponent<EdgeScript>().changeMaterial(ArrowMaterial);
             HingeGameObjects[i].GetComponent<EdgeScript>().changeWidth(5.0f);
             //はじめは表示しない
