@@ -1,0 +1,245 @@
+[33mcommit 264f11ac3c52b8795880472be8bf1afe3e79fb81[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Sep 1 02:51:57 2017 +0900
+
+    start stopボタン作成
+
+[33mcommit 75e1c494bffded5c29dca6926a437bbebd5e7dd6[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Sep 1 02:25:31 2017 +0900
+
+    設定ボタンとペイントボタンとパネルの前後関係を修正
+
+[33mcommit c2618ac69d8f206abba340492ad0e53e189b320f[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Sep 1 01:32:17 2017 +0900
+
+    設定画面とペイント画面を追加（画面内未実装)
+
+[33mcommit 56376ff7593a1378fd21bdea9dc2e8bdd4556992[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 02:49:07 2017 +0900
+
+    Save Projects
+
+[33mcommit 594b538183565134ddcd67a7812c2eb067ba7f92[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 02:48:24 2017 +0900
+
+    カメラの回転中心がおかしかった = オブジェクトの重心位置が(0,0)になっていなかったミスを訂正
+
+[33mcommit 0ebcc6016741f411525ea46de0c96dad3a006d15[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 02:44:47 2017 +0900
+
+    ペイントモードのときしか色塗り部分非表示に
+
+[33mcommit b9d7205bd720decb0c3731a4ac89e253f359a5a9[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 02:40:42 2017 +0900
+
+    シミュレーション中は色塗り部分非表示に
+
+[33mcommit ba6b39d472af4f289d4bc1c87481d6471832295f[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 02:34:30 2017 +0900
+
+    面積は連続で塗れるように
+
+[33mcommit b22b038ac175a3af2e15ecd5ea835b068db00813[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 02:06:35 2017 +0900
+
+    面積のぬったところのマテリアルを透明に
+
+[33mcommit 7cc3c813289448f13e450a09017fcb5982cb8ce5[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 01:31:39 2017 +0900
+
+    Labelのサイズ変更
+
+[33mcommit fefff6c276b5d36abd912fbbf132f16e6718ab69[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Mon Jul 3 01:26:09 2017 +0900
+
+    GUIをScale With Screen Size Modeni
+
+[33mcommit 0206d0efb31b742ab3fd2f976f79d15991a29fd7[m
+Author: nittax_mba <lp6m2014@gmail.com>
+Date:   Wed May 31 11:08:22 2017 +0900
+
+    シミュレーション中に面積の選択部分の座標更新するようにした
+
+[33mcommit 68a824230574d0ace1f098eedd5fa79abc9798ea[m
+Author: nittax_mba <lp6m2014@gmail.com>
+Date:   Wed May 31 10:54:37 2017 +0900
+
+    カメラ移動とペイントを切り替えるボタンを追加（タブレット用）
+
+[33mcommit 39aab7223283ea51db1c80830d6226ecd34e61f2[m
+Author: nittax_mba <lp6m2014@gmail.com>
+Date:   Wed May 31 10:46:55 2017 +0900
+
+    シミュレーション中もduration表示するようにした
+
+[33mcommit ae51f059dbb7419073fca61d287939565b50d6f3[m
+Author: nittax_mba <lp6m2014@gmail.com>
+Date:   Wed May 31 10:35:21 2017 +0900
+
+    param resetでduration arrayもresetするようにした
+
+[33mcommit d6dc4ba7492b7ceb929010b0d0bfc55b1c0266a2[m
+Author: nittax_mba <lp6m2014@gmail.com>
+Date:   Wed May 31 10:35:03 2017 +0900
+
+    add webgl directory to .gitignore
+
+[33mcommit 5f49c84eccaf81a7c231d69db2407af36c309f0d[m
+Author: nittax_mba <lp6m2014@gmail.com>
+Date:   Wed May 31 09:40:05 2017 +0900
+
+    add .DS_Store and iOS project directory
+
+[33mcommit a33fd96edb290dc7d00f5b00eaef2c522867ffeb[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Wed May 31 02:26:54 2017 +0900
+
+    折り曲げのマテリアルも折り曲げ自然角に応じて変更するようにした,5月ミーティングここまで
+
+[33mcommit b48fb676f42701ad09403a5a12ff864c38a15fd6[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Wed May 31 02:06:59 2017 +0900
+
+    面積およびヒンジのバネをコンボボックスで選択した通りに変更するように変更
+
+[33mcommit 975bc8fa8bf3e025e2a70298a6e6b730c2e6a875[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Wed May 31 00:42:58 2017 +0900
+
+    選択ボタンをシミュレート中も表示するように変更
+
+[33mcommit db422bc927e66c2c2679e6650e5f5e58e4825ac0[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Wed May 31 00:42:15 2017 +0900
+
+    余計なコードを削除
+
+[33mcommit 16da58c37d276d5fdac1f1c1ab75e63e87e7c620[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Wed May 31 00:23:18 2017 +0900
+
+    N=2のときのヒンジ選択を改善
+
+[33mcommit 391af1aec27f46d34a80564a2425589e14ae9d18[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Tue May 30 23:55:11 2017 +0900
+
+    N変更したときに不要なオブジェクトがヒエラルキーに残るので各クラスのメンバのGameObjectもDestroyすることにした
+
+[33mcommit 4a04bb67e7f5e560165797d6754419e8020ab1fd[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sun May 28 22:49:59 2017 +0900
+
+    0528
+
+[33mcommit fe794cc3af095e8791f91576543271c0883c6c86[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sun May 28 16:28:59 2017 +0900
+
+    ヒンジ選択とりあえず作成
+
+[33mcommit 34d155420c9b677e9ae2b73c039caf920a491f2e[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sun May 28 13:36:05 2017 +0900
+
+    ボタンからToggleに変更
+
+[33mcommit d05d2eb803e00b6fc3c3bee8af7ba3b81fa7353c[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sun May 28 01:34:42 2017 +0900
+
+    面の選択実装完了(ひどいコード)
+
+[33mcommit ec7a9cb7e5968bc8541fbda37df6e0b341875140[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sat May 27 17:41:31 2017 +0900
+
+    選択ボタンを配置(未実装)
+
+[33mcommit 73fe3621892671e5a79226cf7c0af80c62e5ff40[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sat May 27 17:29:19 2017 +0900
+
+    HingeStencilの計算をstaticに
+
+[33mcommit 28f1f650d1ae9e46773104d27b295b060de915b9[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Thu Apr 27 06:07:22 2017 +0900
+
+    左クリックで折り曲げ自然角度変更できるようにした なんかArgumentOutRangeExceptionでてるぞ
+
+[33mcommit eced838ca894a6636de8cc48fa94ca2a139c194f[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Thu Apr 27 05:21:28 2017 +0900
+
+    座標系を左下右下を原点,iを上方向jを右方向としたものにヒンジコメント変更(?)
+
+[33mcommit 89c089542e27d454247e9093caeddff09994d29c[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Thu Apr 27 04:48:07 2017 +0900
+
+    四角形選択も可能に
+
+[33mcommit 7fb3397c38bd255626270388b65993a8cc660426[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Thu Apr 20 21:30:19 2017 +0900
+
+    ヒンジ選択実装途中
+
+[33mcommit 574a5662d1f30d9931bf9bb0e1b981643071917c[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Thu Apr 20 19:16:23 2017 +0900
+
+    マウスがのっている面を赤く表示する機能を追加
+
+[33mcommit b06b9cd3ff50d6fae83a0fae03a04523658923f8[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Thu Apr 20 17:43:11 2017 +0900
+
+    MeshColiderを追加, 常に面が貼られるようにした
+
+[33mcommit 7e804ac686503f761b1939094e697b480d21e3a2[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Sat Mar 25 16:46:29 2017 +0900
+
+    3/24 meeting
+
+[33mcommit 2705755e5e11d10964008a692cebade280ff3f5d[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Mar 24 11:21:09 2017 +0900
+
+    SpringConstantとスピードを各シミュレート毎に設定可能にした
+
+[33mcommit 7d1e52965bcaa3659a0276fa273a0eaad413b863[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Mar 24 09:39:22 2017 +0900
+
+    .metaは必要!!
+
+[33mcommit b5481ccd9053aa185a5015e2d6a5bb3b61f6cc29[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Mar 24 03:41:26 2017 +0900
+
+    マウスに近い点を検出したかった
+
+[33mcommit 05be2cdb98b4f0eb609ce30f5c6b52be38d98083[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Mar 24 02:58:22 2017 +0900
+
+    自然面積,自然角度のGUI上での変更が可能にした. どのシミュレーションを行うかもGUI上で変更可能
+
+[33mcommit 5840fb665a8f9e5e5c8496a20462018dbde3898a[m
+Author: lp6m <lp6m2014@gmail.com>
+Date:   Fri Mar 24 01:48:08 2017 +0900
+
+    first commit
