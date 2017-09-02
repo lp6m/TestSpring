@@ -205,6 +205,8 @@ public class Main : MonoBehaviour {
         PaintPanelSheet.transform.rotation = Canvas.transform.rotation;
         Vector3 nowPos = PaintPanelSheet.transform.position;
         PaintPanelSheet.transform.position = Canvas.transform.position;
+		PaintPanelSheet.transform.Rotate(new Vector3(-90f,-180f,0f));
+		PaintPanelSheet.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
     }
     public void ClosePaintButtonPressed() {
         PaintPanel.SetActive(false);
