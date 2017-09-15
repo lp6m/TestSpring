@@ -75,9 +75,13 @@ public class GLManage : MonoBehaviour {
         GL.PushMatrix();
         GL.Begin(GL.TRIANGLES);
         GL.Color(col);
-        GL.Vertex3(v0.x, v0.y + 1.5f, v0.z);
+        /*GL.Vertex3(v0.x, v0.y + 1.5f, v0.z);
         GL.Vertex3(v1.x, v1.y + 1.5f, v1.z);
-        GL.Vertex3(v2.x, v2.y + 1.5f, v2.z);
+        GL.Vertex3(v2.x, v2.y + 1.5f, v2.z);*/
+
+        GL.Vertex3(v0.x, v0.y, v0.z);
+        GL.Vertex3(v1.x, v1.y, v1.z);
+        GL.Vertex3(v2.x, v2.y, v2.z);
         GL.End();
         GL.PopMatrix();
     }
@@ -88,10 +92,15 @@ public class GLManage : MonoBehaviour {
         GL.PushMatrix();
         GL.Begin(GL.QUADS);
         GL.Color(col);
-        GL.Vertex3(v0.x, v0.y + 1.5f, v0.z);
+        /*GL.Vertex3(v0.x, v0.y + 1.5f, v0.z);
         GL.Vertex3(v1.x, v1.y + 1.5f, v1.z);
         GL.Vertex3(v2.x, v2.y + 1.5f, v2.z);
         GL.Vertex3(v3.x, v3.y + 1.5f, v3.z);
+        */
+        GL.Vertex3(v0.x, v0.y, v0.z);
+        GL.Vertex3(v1.x, v1.y, v1.z);
+        GL.Vertex3(v2.x, v2.y, v2.z);
+        GL.Vertex3(v3.x, v3.y, v3.z);
         GL.End();
         GL.PopMatrix();
     }

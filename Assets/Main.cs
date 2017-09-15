@@ -26,16 +26,22 @@ public class Main : MonoBehaviour {
     public float delta;
     private GameObject ManageSheet; //シミュレーションするシート
     public GameObject TriangleSheetPrefab;
+    public GameObject TrianglePlatePrefab;
+    public GameObject TriangleSpritePrefab;
+    public Material EdgeMaterial;
     // Use this for initialization
     void Start () {
         ManageSheet = Instantiate(TriangleSheetPrefab);
+        ManageSheet.GetComponent<TriangleSheet>().TouchDetection = false;
         ManageSheet.name = "TriangleSheet";
         //GUI初期化
         GUIInitialize();
+        nowSelectEdge = new GameObject();
+        nowSelectEdge.AddComponent<LineRenderer>();
+        var line = nowSelectEdge.GetComponent<LineRenderer>();
+        line.material = EdgeMaterial;
+        line.material.color = Color.black;
 	}
-    void Update() {
-        
-    }
     private void GUIInitialize() {
         XSlider.maxValue = YSlider.maxValue = ZSlider.maxValue = MaxForceSizeXYZ;
         XSlider.minValue = YSlider.minValue = ZSlider.minValue = MinForceSizeXYZ;
@@ -197,20 +203,188 @@ public class Main : MonoBehaviour {
 	}
     public void OpenPaintButtonPressed() {
         PaintPanel.SetActive(true);
+        PaintPanelDraw();
         //TriangleSheetを作成してパネルより手前に配置
-        GameObject PaintPanelSheet = Instantiate(TriangleSheetPrefab);
-        PaintPanelSheet.name = "PaintPanelSheet";
-        GameObject Canvas = GameObject.Find("Canvas");
-        //PaintPanelSheet.transform.LookAt(Canvas.transform);
-        PaintPanelSheet.transform.rotation = Canvas.transform.rotation;
-        Vector3 nowPos = PaintPanelSheet.transform.position;
-        PaintPanelSheet.transform.position = Canvas.transform.position;
-		PaintPanelSheet.transform.Rotate(new Vector3(-90f,-180f,0f));
-		PaintPanelSheet.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        
     }
     public void ClosePaintButtonPressed() {
         PaintPanel.SetActive(false);
+        //PaintPanelの子を全て削除
         //Paintパネルに塗られたTrianleSheetから色塗りデータを取得
+        foreach (Transform n in PaintPanel.transform) {
+            if (n.gameObject.name == "plate" || n.gameObject.name == "edge") Destroy(n.gameObject);
+        }
+    }
+    private List<Vector3> paintPanelVertList = new List<Vector3>();
+    public void PaintPanelDraw() {
+        var canvas = GameObject.Find("Canvas");
+        var canvasRect = canvas.GetComponent<RectTransform>();
+        int N = this.ManageSheet.GetComponent<TriangleSheet>().N;
+        float TriangleDrawAreaScale = 0.6f; //Canvasに対してこのスケールで描画
+        float width = Screen.width;
+        float height = Screen.height;
+        //三角形の1辺の長さを決定する
+        float a = Mathf.Min(width * TriangleDrawAreaScale / (Mathf.Sqrt(3) * ((float)N - 1)), height * TriangleDrawAreaScale / ((float)N - 1));
+        //三角形の集合の左端の位置
+        Vector2 basePos = new Vector2(150f, height - height * TriangleDrawAreaScale / 2.0f);
+        Vector2 shakoVecX = new Vector2(Mathf.Sqrt(3.0f) / 2.0f * a, -1 * a / 2.0f);
+        Vector2 shakoVecY = new Vector2(Mathf.Sqrt(3.0f) / 2.0f * a, 1 * a / 2.0f);
+        paintPanelVertList.Clear();
+        for (int i = 0; i < 2 * (N - 1) * (N - 1); i++) {
+            Vector2 v1, v2, v3;
+            if (i % 2 == 0) {
+                //斜交座標を求める
+                int xx = (i / 2) % (N - 1);
+                int yy = (i / 2) / (N - 1);
+                //斜交座標から変換
+                v1 = ((float)xx) * shakoVecX + ((float)yy) * shakoVecY;
+                v2 = ((float)xx + 1) * shakoVecX + ((float)yy) * shakoVecY;
+                v3 = ((float)xx) * shakoVecX + ((float)yy + 1) * shakoVecY;
+                v1 += basePos; v2 += basePos; v3 += basePos;
+            }
+            else {
+                //斜交座標を求める
+                int xx = ((i - 1) / 2) % (N - 1) + 1;
+                int yy = ((i - 1) / 2) / (N - 1);
+                //斜交座標から変換
+                v1 = ((float)xx) * shakoVecX + ((float)yy) * shakoVecY;
+                v2 = ((float)xx - 1) * shakoVecX + ((float)yy + 1) * shakoVecY;
+                v3 = ((float)xx) * shakoVecX + ((float)yy + 1) * shakoVecY;
+                v1 += basePos; v2 += basePos; v3 += basePos;  
+            }
+            //v1,v2,v3を頂点とするMeshをもつGameObjectを作成
+            GameObject plateObject = Instantiate(TrianglePlatePrefab);
+            plateObject.name = "plate";
+            plateObject.GetComponent<TrianglePlate>().index = i;
+            plateObject.transform.parent = PaintPanel.transform;
+            plateObject.transform.position = Vector3.zero;
+            //ScreenPosからWorldPosに変換
+            Vector3 vv1, vv2, vv3;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v1, Camera.main, out vv1);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v2, Camera.main, out vv2);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v3, Camera.main, out vv3);
+            plateObject.GetComponent<TrianglePlate>().SetupMesh(new Vector3[] { vv1, vv2, vv3});
+            paintPanelVertList.Add(vv1);
+            paintPanelVertList.Add(vv2);
+            paintPanelVertList.Add(vv3);
+        }
+
+        //三角形の境界線をLineRendererで描画する
+        //左上から右下
+        for (int i = 0; i < N; i++) {
+            GameObject g = new GameObject("edge");
+            g.AddComponent<LineRenderer>();
+            g.transform.parent = PaintPanel.transform;
+            LineRenderer line = g.GetComponent<LineRenderer>();
+            Vector2 v1 = shakoVecX * 0 + shakoVecY * i + basePos;
+            Vector2 v2 = shakoVecX * (N - 1) + shakoVecY * i + basePos;
+            Vector3 vv1, vv2;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v1, Camera.main, out vv1);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v2, Camera.main, out vv2);
+            line.material = EdgeMaterial;
+            line.material.color = Color.white;
+            line.startWidth = line.endWidth = 0.2f;
+            line.SetPosition(0, vv1);
+            line.SetPosition(1, vv2);
+        }
+        //上から下前半
+        for (int i = 0; i < N - 1; i++) {
+            GameObject g = new GameObject("edge");
+            g.AddComponent<LineRenderer>();
+            g.transform.parent = PaintPanel.transform;
+            LineRenderer line = g.GetComponent<LineRenderer>();
+            Vector2 v1 = shakoVecX * 0 + shakoVecY * (i + 1) + basePos;
+            Vector2 v2 = shakoVecX * (i + 1) + shakoVecY * 0 + basePos;
+            Vector3 vv1, vv2;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v1, Camera.main, out vv1);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v2, Camera.main, out vv2);
+            line.material = EdgeMaterial;
+            line.material.color = Color.white;
+            line.startWidth = line.endWidth = 0.2f;
+            line.SetPosition(0, vv1);
+            line.SetPosition(1, vv2);
+        }
+        //上から下後半
+        for (int i = 0; i < N - 2; i++) {
+            GameObject g = new GameObject("edge");
+            g.AddComponent<LineRenderer>();
+            g.transform.parent = PaintPanel.transform;
+            LineRenderer line = g.GetComponent<LineRenderer>();
+            Vector2 v1 = shakoVecX * (i + 1) + shakoVecY * (N - 1) + basePos;
+            Vector2 v2 = shakoVecX * (N - 1) + shakoVecY * (i + 1) + basePos;
+            Vector3 vv1, vv2;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v1, Camera.main, out vv1);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v2, Camera.main, out vv2);
+            line.material = EdgeMaterial;
+            line.material.color = Color.white;
+            line.startWidth = line.endWidth = 0.2f;
+            line.SetPosition(0, vv1);
+            line.SetPosition(1, vv2);
+        }
+        //左下から右上
+        for (int i = 0; i < N; i++) {
+            GameObject g = new GameObject("edge");
+            g.AddComponent<LineRenderer>();
+            g.transform.parent = PaintPanel.transform;
+            LineRenderer line = g.GetComponent<LineRenderer>();
+            Vector2 v1 = shakoVecX * i + shakoVecY * 0 + basePos;
+            Vector2 v2 = shakoVecX * i + shakoVecY * (N - 1) + basePos;
+            Vector3 vv1, vv2;
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v1, Camera.main, out vv1);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(canvasRect, v2, Camera.main, out vv2);
+            line.material = EdgeMaterial;
+            line.material.color = Color.white;
+            line.startWidth = line.endWidth = 0.2f;
+            line.SetPosition(0, vv1);
+            line.SetPosition(1, vv2);
+        }
+    }
+    void Update() {
+        if (Input.GetMouseButton(0) == false) {
+            //マウス押してないなら選択線描画しない
+            nowSelecting = false;
+            nowSelectEdge.SetActive(false);
+        }
+        //PaintPanelのあたり判定をここで行う
+        RaycastHit hit;
+        if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))
+            return;
+
+        MeshCollider meshCollider = hit.collider as MeshCollider;
+        if (meshCollider == null || meshCollider.sharedMesh == null)
+            return;
+        Mesh mesh = meshCollider.sharedMesh;
+        //GetComponent<Renderer>().material.color = Color.blue;
+        if (hit.collider.tag == "Plate" && Input.GetMouseButton(0)) {
+            //どの面があたったか調べる
+            int index = hit.collider.gameObject.GetComponent<TrianglePlate>().index;
+            Debug.Log(index);
+            //hit.collider.gameObject.GetComponent<Renderer>().material.color = Color.gray;
+            //どの面があたったかわかればどの点が一番近いかわかる
+            if (paintPanelVertList.Count < index * 3 + 2) return;
+            Vector3 v1 = paintPanelVertList[index * 3];
+            Vector3 v2 = paintPanelVertList[index * 3 + 1];
+            Vector3 v3 = paintPanelVertList[index * 3 + 2];
+            float d1 = Vector3.Distance(v1, hit.point);
+            float d2 = Vector3.Distance(v2, hit.point);
+            float d3 = Vector3.Distance(v3, hit.point);
+            int nearestpoint = index * 3;
+            if (d1 > d2 && d3 > d2) nearestpoint = index * 3 + 1;
+            if (d1 > d3 && d2 > d3) nearestpoint = index * 3 + 2;
+            var line = nowSelectEdge.GetComponent<LineRenderer>();
+            if (nowSelecting == false) {
+                nowSelectEdge.SetActive(true);
+                line.SetPosition(0, paintPanelVertList[nearestpoint]);
+                nowSelecting = true;
+            }
+            else {
+                line.SetPosition(1, paintPanelVertList[nearestpoint]);
+            }
+        }
     }
     #endregion
+    int nowSelectPointStartIndex;
+    int nowSelectPointEndIndex;
+    bool nowSelecting = false;
+    GameObject nowSelectEdge;
 }

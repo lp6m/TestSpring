@@ -39,6 +39,8 @@ public class TriangleSheet : MonoBehaviour {
     public int[] SimulateSpeed;//何回コルーチン呼ぶか
     public float[] DefaultSpringConstant;
     public float[] SpringConstants;
+    //触っている面についてあたり判定を使用するかのパラメータ ペイント画面で表示するシートの場合のみTrue, シミュレーションシートではFalseに
+    public bool TouchDetection;
     //シミュレーションパラメータ
     public float natural_bendangle = 0; //自然角度
     public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
