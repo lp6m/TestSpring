@@ -186,9 +186,12 @@ public class Main : MonoBehaviour {
     public void CloseSettingsButtonPressed() {
         SettingsPanel.SetActive(false);
     }
+    public bool nowSelectedViewerVisible = true; //SelectedViewerがtrueか
     public void OpenPaintButtonPressed() {
         if (IsPaintMode) return;
         IsPaintMode = true;
+        nowSelectedViewerVisible = true;
+        this.ManageSheet.GetComponent<TriangleSheet>().SelectedViewer.GetComponent<SelectedViewer>().RedrawSelectedViewer();
         PaintPanel.SetActive(true);
         
     }
@@ -213,6 +216,14 @@ public class Main : MonoBehaviour {
         for (int index = 0; index < 13; index++) {
             if(HingePalletToggles[index].isOn) pallet = new Pallet("hinge", index);
         }
+    }
+    //SelectedViewerの見える・見えないを切り替える
+    public void OnToggleSelectedViewerActiveButtonPressed() {
+        if (this.IsPaintMode) return;//ペイントモードのときは切り替え不可
+        nowSelectedViewerVisible = !nowSelectedViewerVisible;
+        var selectedViewer = this.ManageSheet.GetComponent<TriangleSheet>().SelectedViewer.GetComponent<SelectedViewer>();
+        if (nowSelectedViewerVisible) selectedViewer.RedrawSelectedViewer();
+        else selectedViewer.HideSelectedViweer();
     }
     #endregion
 }

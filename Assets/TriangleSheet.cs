@@ -26,7 +26,7 @@ public class TriangleSheet : MonoBehaviour {
     //面を貼るオブジェクト
     private GameObject SurfaceGameObject;
     //選択している場所を表示するためのオブジェクト
-    private GameObject SelectedViewer;
+    public GameObject SelectedViewer;
     public float MaxForceSizeXYZ, MinForceSizeXYZ;
     private Vector3 ExternalForce;
     public bool issimulating = false;

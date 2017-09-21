@@ -116,7 +116,18 @@ public class SelectedViewer : MonoBehaviour {
             if (this.sheet.issimulating == false) HingeGameObjects[hingegameobject_index].SetActive(true);
         }
     }
-	// Update is called once per frame
+    //SelectedViewerを隠す
+    public void HideSelectedViweer() {
+        foreach (var g in AreaGameObjects) g.SetActive(false);
+        foreach (var g in HingeGameObjects) g.SetActive(false);
+    }
+    //changeMaterialを呼ぶことで、DurationArrayに応じてSelectedViewerを再描画（重いのでUpdateでは呼ばない)
+    public void RedrawSelectedViewer() {
+        for (int i = 0; i < AreaGameObjects.Length; i++) changeAreaMaterial(i);
+        for (int i = 0; i < (sheet.N - 2) * (sheet.N - 1); i++) changeHingeMaterial(0, i);
+        for (int i = 0; i < (sheet.N - 1) * (sheet.N - 2); i++) changeHingeMaterial(1, i);
+        for (int i = 0; i < (sheet.N - 1) * (sheet.N - 1); i++) changeHingeMaterial(2, i);
+    }
 	void Update () {
 		UpdateAreaSpringSelectedVisibleViewPosition();
         UpdateHingeStencilSpringSelectedVisiblePosition();
