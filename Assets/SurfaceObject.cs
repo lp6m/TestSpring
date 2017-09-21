@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using UnityEngine.EventSystems;
 
 public class SurfaceObject : MonoBehaviour {
     private Mesh SurfaceObjectMesh;
@@ -67,7 +68,17 @@ public class SurfaceObject : MonoBehaviour {
         GetComponent<MeshCollider>().sharedMesh = SurfaceObjectMesh;
     }
     // Update is called once per frame
+    private int fingerID = -1;
+    private void Awake() {
+#if !UNITY_EDITOR
+     fingerID = 0; 
+#endif
+    }
     void Update () {
+        if (EventSystem.current.IsPointerOverGameObject(fingerID)) {
+            //UIをタップしているのであたり判定を行わない
+            return;
+        }
         #region TouchSurface
         //マウスのrayとMeshの当たり判定を行う
 
