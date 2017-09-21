@@ -549,13 +549,9 @@ public class TriangleSheet : MonoBehaviour {
 
     #region changeNaturalDuration
     public void ChangeSurfaceNaturalDuration(int[] vertindex) {
-		//もしpaintモードでないなら変更しない
-		if (GameManagerMain.IsPaintMode == false) return;
-        //もし面選択モードでないなら変更しない
-        if (GameManagerMain.pallet.mode != "area") return;
         try {
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
-            //コンボボックスで選択した自然長にする
+            //パレットで選択した自然長にする
             SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.pallet.index;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeAreaMaterial(surfaceindex);
         }
@@ -563,42 +559,54 @@ public class TriangleSheet : MonoBehaviour {
             Console.WriteLine(ex.Message);
         }
     }
-    public void ChangeHingeNaturalDuration(int[] vertindex) {
-		//もしpaintモードでないなら変更しない
-		if (GameManagerMain.IsPaintMode == false) return;
-        //もしヒンジ選択モードでないなら変更しない
-        if (GameManagerMain.pallet.mode != "hinge") return;
-        //コンボボックスで選択した角度に変更する
+    public void ChangeHingeNaturalDuration(int startVertIndex, int endVertIndex) {
+        //パレットで選択した角度に変更する
         //まずどのタイプのヒンジか調べる必要がある
-        Array.Sort(vertindex);
-        int h = vertindex[0] / N;
-        int w = vertindex[0] % N;
+        if(startVertIndex == endVertIndex) return;
+        if(startVertIndex > endVertIndex){
+            //swap
+            var tmp = endVertIndex;
+            endVertIndex = startVertIndex;
+            startVertIndex = tmp;
+        }
+        int h1 = startVertIndex / N;
+        int h2 = endVertIndex / N;
+        int w1 = startVertIndex % N;
+        int w2 = endVertIndex % N;
 		//N=2のときだけ例外処理
 		if (N == 2) {
-			//ヒンジタイプC
-            Hinge_NaturalDurationAarray[2][0] = GameManagerMain.pallet.index;
-			this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, 0);
+            if (startVertIndex == 1 && endVertIndex == 2) {
+                //ヒンジタイプC
+                Hinge_NaturalDurationAarray[2][0] = GameManagerMain.pallet.index;
+                this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, 0);
+            }
 			return;
 		}
-        if (vertindex[0] + N - 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + 2 * N - 1 == vertindex[3]) {
+        if (h1 == h2) {
             //ヒンジタイプA
-            int hinge_index = (N - 1) * h + w - 1;
-            Hinge_NaturalDurationAarray[0][hinge_index] = GameManagerMain.pallet.index;
-            this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(0, hinge_index);
+            for (int i = 0; i < w2 - w1; i++) {
+                int hinge_index = (N - 1) * (h1 - 1) + w1 + i;
+                Hinge_NaturalDurationAarray[0][hinge_index] = GameManagerMain.pallet.index;
+                this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(0, hinge_index);
+            }
             return;
         }
-        if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N - 1 == vertindex[2] && vertindex[0] + N == vertindex[3]) {
+        if (w1 == w2) {
             //ヒンジタイプB
-            int hinge_index = (N - 2) * h + w - 1;
-            Hinge_NaturalDurationAarray[1][hinge_index] = GameManagerMain.pallet.index;
-            this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(1, hinge_index);
+            for (int i = 0; i < h2 - h1; i++) {
+                int hinge_index = (N - 2) * (h1 + i) + w1 - 1;
+                Hinge_NaturalDurationAarray[1][hinge_index] = GameManagerMain.pallet.index;
+                this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(1, hinge_index);
+            }
             return;
         }
-        if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + N + 1 == vertindex[3]) {
+        if (Math.Abs(h2 - h1) == Math.Abs(w2 - w1)) {
             //ヒンジタイプC
-            int hinge_index = (N - 1) * h + w;
-            Hinge_NaturalDurationAarray[2][hinge_index] = GameManagerMain.pallet.index;
-            this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, hinge_index);
+            for (int i = 0; i < Math.Abs(h2 - h1); i++) {
+                int hinge_index = (N - 1) * h1 + w1 - 1 + (N - 2) * i;
+                Hinge_NaturalDurationAarray[2][hinge_index] = GameManagerMain.pallet.index;
+                this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, hinge_index);
+            }
             return;
         }
     }
