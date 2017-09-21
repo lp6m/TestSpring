@@ -555,6 +555,7 @@ public class TriangleSheet : MonoBehaviour {
             if (vertindex[0] > N * N) {
                 for (int i = 0; i < 3; i++) vertindex[i] -= N * N;
             }
+            addOldDurationArray();
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
             //パレットで選択した自然長にする
             SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.pallet.index;
@@ -588,6 +589,7 @@ public class TriangleSheet : MonoBehaviour {
 		//N=2のときだけ例外処理
 		if (N == 2) {
             if (startVertIndex == 1 && endVertIndex == 2) {
+                addOldDurationArray();
                 //ヒンジタイプC
                 Hinge_NaturalDurationAarray[2][0] = GameManagerMain.pallet.index;
                 this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, 0);
@@ -596,6 +598,7 @@ public class TriangleSheet : MonoBehaviour {
 		}
         if (h1 == h2) {
             //ヒンジタイプA
+            addOldDurationArray();
             for (int i = 0; i < w2 - w1; i++) {
                 int hinge_index = (N - 1) * (h1 - 1) + w1 + i;
                 Hinge_NaturalDurationAarray[0][hinge_index] = GameManagerMain.pallet.index;
@@ -605,6 +608,7 @@ public class TriangleSheet : MonoBehaviour {
         }
         if (w1 == w2) {
             //ヒンジタイプB
+            addOldDurationArray();
             for (int i = 0; i < h2 - h1; i++) {
                 int hinge_index = (N - 2) * (h1 + i) + w1 - 1;
                 Hinge_NaturalDurationAarray[1][hinge_index] = GameManagerMain.pallet.index;
@@ -613,6 +617,7 @@ public class TriangleSheet : MonoBehaviour {
             return;
         }
         if (Math.Abs(h2 - h1) == Math.Abs(w2 - w1)) {
+            addOldDurationArray();
             //ヒンジタイプC
             for (int i = 0; i < Math.Abs(h2 - h1); i++) {
                 int hinge_index = (N - 1) * h1 + w1 - 1 + (N - 2) * i;
@@ -630,6 +635,47 @@ public class TriangleSheet : MonoBehaviour {
     public void ChangeSelectVisible() {
         if (SelectedViewer == null) return;
         this.SelectedViewer.GetComponent<SelectedViewer>().ToggleVisible();
+    }
+    List<int[]> old_SurfaceSpring_NaturalDurationArrayList = new List<int[]>();
+    List<List<int>[]> old_Hinge_NaturalDurationArrayList = new List<List<int>[]>();
+    void addOldDurationArray() {
+        //前と全く同じなら追加しない
+        pushSurfaceSpring_NaturalDurationArrayList(this.SurfaceSpring_NaturalDurationArray);
+        pushHinge_NaturalDurationArrayList(this.Hinge_NaturalDurationAarray);
+    }
+    public void undoSelected() {
+        if (old_Hinge_NaturalDurationArrayList.Count == 0) return;
+        //スタックからpop
+        //DurationArrayを古いものに戻す
+        SurfaceSpring_NaturalDurationArray = popSurfaceSpring_NaturalDurationArrayList();
+        Hinge_NaturalDurationAarray = popHinge_NaturalDurationAarrayList();
+        //再描画する
+        this.SelectedViewer.GetComponent<SelectedViewer>().RedrawSelectedViewer();
+    }
+    const int max_undo_num = 10;
+    void pushSurfaceSpring_NaturalDurationArrayList(int[] durationArray) {
+        old_SurfaceSpring_NaturalDurationArrayList.Add(durationArray.Clone() as int[]);
+        if (old_SurfaceSpring_NaturalDurationArrayList.Count > max_undo_num) {
+            old_SurfaceSpring_NaturalDurationArrayList.RemoveAt(0);
+        }
+    }
+    void pushHinge_NaturalDurationArrayList(List<int>[] durationArray) {
+        old_Hinge_NaturalDurationArrayList.Add(durationArray.Clone() as List<int>[]);
+        if (old_Hinge_NaturalDurationArrayList.Count > max_undo_num) {
+            old_Hinge_NaturalDurationArrayList.RemoveAt(0);
+        }
+    }
+    int[] popSurfaceSpring_NaturalDurationArrayList() {
+        int num = old_SurfaceSpring_NaturalDurationArrayList.Count;
+        var res = old_SurfaceSpring_NaturalDurationArrayList[num - 1].Clone() as int[];
+        old_SurfaceSpring_NaturalDurationArrayList.RemoveAt(num - 1);
+        return res;
+    }
+    List<int>[] popHinge_NaturalDurationAarrayList() {
+        int num = old_Hinge_NaturalDurationArrayList.Count;
+        var res = old_Hinge_NaturalDurationArrayList[num - 1].Clone() as List<int>[];
+        old_Hinge_NaturalDurationArrayList.RemoveAt(num - 1);
+        return res;
     }
     #endregion
 

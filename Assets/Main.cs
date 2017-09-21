@@ -225,5 +225,9 @@ public class Main : MonoBehaviour {
         if (nowSelectedViewerVisible) selectedViewer.RedrawSelectedViewer();
         else selectedViewer.HideSelectedViweer();
     }
+    //Undoボタン
+    public void OnUndoButtonPressed() {
+        ManageSheet.GetComponent<TriangleSheet>().undoSelected();
+    }
     #endregion
 }
