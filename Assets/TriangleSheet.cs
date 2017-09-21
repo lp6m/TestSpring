@@ -550,6 +550,11 @@ public class TriangleSheet : MonoBehaviour {
     #region changeNaturalDuration
     public void ChangeSurfaceNaturalDuration(int[] vertindex) {
         try {
+            //裏点の場合は表点に変換
+            Array.Sort(vertindex);
+            if (vertindex[0] > N * N) {
+                for (int i = 0; i < 3; i++) vertindex[i] -= N * N;
+            }
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
             //パレットで選択した自然長にする
             SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.pallet.index;
@@ -568,6 +573,13 @@ public class TriangleSheet : MonoBehaviour {
             var tmp = endVertIndex;
             endVertIndex = startVertIndex;
             startVertIndex = tmp;
+        }
+        //表点と裏点がつながっている場合はやばいので結ばない
+        if (startVertIndex < N * N  && endVertIndex >= N * N ) return;
+        //裏点同士がつながっている場合は表点に変換
+        if (startVertIndex >= N * N && endVertIndex >= N * N) {
+            startVertIndex -= N * N;
+            endVertIndex -= N * N;
         }
         int h1 = startVertIndex / N;
         int h2 = endVertIndex / N;
