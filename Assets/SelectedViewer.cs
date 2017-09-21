@@ -110,10 +110,10 @@ public class SelectedViewer : MonoBehaviour {
             HingeGameObjects[hingegameobject_index].SetActive(false);
         }else if(duration_index <= 5){
             HingeGameObjects[hingegameobject_index].GetComponent<EdgeScript>().changeMaterial(HingeMaterials[duration_index]);
-            if (this.sheet.issimulating == false) HingeGameObjects[hingegameobject_index].SetActive(true);
+            HingeGameObjects[hingegameobject_index].SetActive(true);
         }else {
             HingeGameObjects[hingegameobject_index].GetComponent<EdgeScript>().changeMaterial(HingeMaterials[duration_index - 1]);
-            if (this.sheet.issimulating == false) HingeGameObjects[hingegameobject_index].SetActive(true);
+            HingeGameObjects[hingegameobject_index].SetActive(true);
         }
     }
     //SelectedViewerを隠す
