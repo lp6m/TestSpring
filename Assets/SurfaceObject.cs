@@ -71,8 +71,6 @@ public class SurfaceObject : MonoBehaviour {
         #region TouchSurface
         //マウスのrayとMeshの当たり判定を行う
 
-        //あたり判定を調べる必要がないシートならば調べない
-        if (sheet.TouchDetection == false) return;
         //当たっていなければreturn
         RaycastHit hit;
         if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit))

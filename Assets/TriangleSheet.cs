@@ -39,11 +39,7 @@ public class TriangleSheet : MonoBehaviour {
     public int[] SimulateSpeed;//何回コルーチン呼ぶか
     public float[] DefaultSpringConstant;
     public float[] SpringConstants;
-    //触っている面についてあたり判定を使用するかのパラメータ ペイント画面で表示するシートの場合のみTrue, シミュレーションシートではFalseに
-    public bool TouchDetection;
     //シミュレーションパラメータ
-    public float natural_bendangle = 0; //自然角度
-    public float surfacespring_naturalduration = 1.0f; //元の面積の1.0倍を自然面積
     public int[] SurfaceSpring_NaturalDurationArray; //各面積の自然面積のインデックス
     private float[] SurfaceSpring_NaturalDurations = new float[] {0.5f, 1.0f, 2.0f, 3.0f};
     public List<int>[] Hinge_NaturalDurationAarray; //各ヒンジの自然角度のインデックス
@@ -228,11 +224,11 @@ public class TriangleSheet : MonoBehaviour {
     public void ToggleSimulate() {
         if (issimulating) {
             StopSimulate();
-            this.SelectedViewer.GetComponent<SelectedViewer>().OnSimulateStopped();//TODO:ちゃんとToggleにしましょう
+            //this.SelectedViewer.GetComponent<SelectedViewer>().OnSimulateStopped();//TODO:ちゃんとToggleにしましょう
         }
         else {
             //選択中のボタンは押せないように
-            this.SelectedViewer.GetComponent<SelectedViewer>().AllSelectedDisable();
+            //this.SelectedViewer.GetComponent<SelectedViewer>().AllSelectedDisable();
             StartSimulate();
         }
     }
@@ -556,11 +552,11 @@ public class TriangleSheet : MonoBehaviour {
 		//もしpaintモードでないなら変更しない
 		if (GameManagerMain.IsPaintMode == false) return;
         //もし面選択モードでないなら変更しない
-        if (GameManagerMain.SelectButton[1].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
+        if (GameManagerMain.pallet.mode != "area") return;
         try {
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
             //コンボボックスで選択した自然長にする
-            SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.SurfaceSpringNaturalDropdown.value;
+            SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.pallet.index;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeAreaMaterial(surfaceindex);
         }
         catch (ArgumentOutOfRangeException ex) {
@@ -571,7 +567,7 @@ public class TriangleSheet : MonoBehaviour {
 		//もしpaintモードでないなら変更しない
 		if (GameManagerMain.IsPaintMode == false) return;
         //もしヒンジ選択モードでないなら変更しない
-        if (GameManagerMain.SelectButton[2].GetComponent<UnityEngine.UI.Toggle>().isOn == false) return;
+        if (GameManagerMain.pallet.mode != "hinge") return;
         //コンボボックスで選択した角度に変更する
         //まずどのタイプのヒンジか調べる必要がある
         Array.Sort(vertindex);
@@ -580,28 +576,28 @@ public class TriangleSheet : MonoBehaviour {
 		//N=2のときだけ例外処理
 		if (N == 2) {
 			//ヒンジタイプC
-			Hinge_NaturalDurationAarray[2][0] = GameManagerMain.HingeNaturalBendangleDropdown.value;
+            Hinge_NaturalDurationAarray[2][0] = GameManagerMain.pallet.index;
 			this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, 0);
 			return;
 		}
         if (vertindex[0] + N - 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + 2 * N - 1 == vertindex[3]) {
             //ヒンジタイプA
             int hinge_index = (N - 1) * h + w - 1;
-            Hinge_NaturalDurationAarray[0][hinge_index] = GameManagerMain.HingeNaturalBendangleDropdown.value;
+            Hinge_NaturalDurationAarray[0][hinge_index] = GameManagerMain.pallet.index;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(0, hinge_index);
             return;
         }
         if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N - 1 == vertindex[2] && vertindex[0] + N == vertindex[3]) {
             //ヒンジタイプB
             int hinge_index = (N - 2) * h + w - 1;
-            Hinge_NaturalDurationAarray[1][hinge_index] = GameManagerMain.HingeNaturalBendangleDropdown.value;
+            Hinge_NaturalDurationAarray[1][hinge_index] = GameManagerMain.pallet.index;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(1, hinge_index);
             return;
         }
         if (vertindex[0] + 1 == vertindex[1] && vertindex[0] + N == vertindex[2] && vertindex[0] + N + 1 == vertindex[3]) {
             //ヒンジタイプC
             int hinge_index = (N - 1) * h + w;
-            Hinge_NaturalDurationAarray[2][hinge_index] = GameManagerMain.HingeNaturalBendangleDropdown.value;
+            Hinge_NaturalDurationAarray[2][hinge_index] = GameManagerMain.pallet.index;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeHingeMaterial(2, hinge_index);
             return;
         }

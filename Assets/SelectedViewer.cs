@@ -5,9 +5,6 @@ using UnityEngine;
 //選択された場所を表示するためのオブジェクト
 public class SelectedViewer : MonoBehaviour {
     private Main GameManagerMain;
-    private bool TwoPointSpringSelectedVisible = false;
-    private bool AreaSpringSelectedVisible = false;
-    private bool HingeStencilSpringSelectedVisible = false;
     public GameObject EdgePrefab;
     public Material RedMaterial;
     public Material ArrowMaterial;
@@ -29,8 +26,8 @@ public class SelectedViewer : MonoBehaviour {
         AreaGameObjects = new GameObject[2 * (sheet.N - 1) * (sheet.N - 1)];
         for (int i = 0; i < AreaGameObjects.Length; i++) {
             AreaGameObjects[i] = new GameObject();
-            AreaGameObjects[i].name = "AreaGameObject";
-            AreaGameObjects[i].transform.parent = sheet.transform;
+            AreaGameObjects[i].name = "SelectedViewer_Area";
+            AreaGameObjects[i].transform.parent = this.transform;
             AreaGameObjects[i].AddComponent<MeshRenderer>();
             AreaGameObjects[i].AddComponent<MeshFilter>();
             //はじめは表示しない
@@ -40,12 +37,15 @@ public class SelectedViewer : MonoBehaviour {
         HingeGameObjects = new GameObject[2 * (sheet.N - 2) * (sheet.N - 1) + (sheet.N - 1) * (sheet.N - 1)];
         for (int i = 0; i < HingeGameObjects.Length; i++) {
             HingeGameObjects[i] = Instantiate(EdgePrefab);
-            HingeGameObjects[i].transform.parent = sheet.transform;
+            HingeGameObjects[i].name = "SelectedViewer_Hinge";
+            HingeGameObjects[i].transform.parent = this.transform;
             HingeGameObjects[i].GetComponent<EdgeScript>().changeMaterial(ArrowMaterial);
             HingeGameObjects[i].GetComponent<EdgeScript>().changeWidth(5.0f);
             //はじめは表示しない
             HingeGameObjects[i].SetActive(false);
         }
+        //メッシュを作成
+        SetAreaSpringMesh();
         //ヒンジタイプに応じて対応するvertexのオブジェクト設定
         int hingecnt = 0;
         for (int i = 0; i < (sheet.N - 2) * (sheet.N - 1); i++) {
@@ -73,38 +73,10 @@ public class SelectedViewer : MonoBehaviour {
 	
     //表示するものを切り替える
     public void ToggleVisible(){
-        GameObject[] toggle_buttons = GameManagerMain.SelectButton;
-        TwoPointSpringSelectedVisible = toggle_buttons[0].GetComponent<UnityEngine.UI.Toggle>().isOn;
-        AreaSpringSelectedVisible = toggle_buttons[1].GetComponent<UnityEngine.UI.Toggle>().isOn;
-        HingeStencilSpringSelectedVisible = toggle_buttons[2].GetComponent<UnityEngine.UI.Toggle>().isOn;
-        if (TwoPointSpringSelectedVisible) SetTwoPointSpringSelectedViewPosition();
-        if (AreaSpringSelectedVisible) {
-            //false->trueなので座標も再セット
-            SetAreaSpringSelectedVisibleViewPosition();
-            for (int i = 0; i < AreaGameObjects.Length; i++) changeAreaMaterial(i);
-        }
-        else {
-            //foreach (var g in AreaGameObjects) g.SetActive(false);
-        }
-        if (HingeStencilSpringSelectedVisible) {
-            //false->trueなので座標も再セット
-            SetHingeStencilSpringSelectedVisiblePosition();
-            for (int i = 0; i < (sheet.N - 2) * (sheet.N - 1); i++) changeHingeMaterial(0, i);
-            for (int i = 0; i < (sheet.N - 1) * (sheet.N - 2); i++) changeHingeMaterial(1, i);
-            for (int i = 0; i < (sheet.N - 1) * (sheet.N - 1); i++) changeHingeMaterial(2, i);
-        }
-        else {
-            //foreach (var g in HingeGameObjects) g.SetActive(false);
-        }
-    }
-    //すべて非表示にする シミュレーションがスタートしたとき
-    public void AllSelectedDisable() {
-        //foreach (var g in AreaGameObjects) g.SetActive(false);
-    }
-    //このコードはなんとかしたほうがいい
-    public void OnSimulateStopped() {
-        //シミュレーションがストップしたときに選択状態を復元する
-        ToggleVisible();
+        for (int i = 0; i < AreaGameObjects.Length; i++) changeAreaMaterial(i);
+        for (int i = 0; i < (sheet.N - 2) * (sheet.N - 1); i++) changeHingeMaterial(0, i);
+        for (int i = 0; i < (sheet.N - 1) * (sheet.N - 2); i++) changeHingeMaterial(1, i);
+        for (int i = 0; i < (sheet.N - 1) * (sheet.N - 1); i++) changeHingeMaterial(2, i);
     }
     //選択した場合に変更されるnaturalLengthに応じてMaterialを変更する
     public void changeAreaMaterial(int surfaceindex) {
@@ -112,18 +84,18 @@ public class SelectedViewer : MonoBehaviour {
         switch (duration_index) {
             case 0: //0.5
                 AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[0];
-                if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
+                AreaGameObjects[surfaceindex].SetActive(true);
                 break;
             case 1: //1.0
                 AreaGameObjects[surfaceindex].SetActive(false);
                 break;
             case 2: //2.0
                 AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[1];
-                if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
+                AreaGameObjects[surfaceindex].SetActive(true);
                 break;
             case 3: //3.0
                 AreaGameObjects[surfaceindex].GetComponent<Renderer>().material = AreaMaterials[2];
-                if (this.sheet.issimulating == false) AreaGameObjects[surfaceindex].SetActive(true);
+                AreaGameObjects[surfaceindex].SetActive(true);
                 break;
         }
     }
@@ -147,13 +119,10 @@ public class SelectedViewer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		UpdateAreaSpringSelectedVisibleViewPosition();
+        UpdateHingeStencilSpringSelectedVisiblePosition();
     }
 
-    //表示切替された際は座標を変更する（シミュレーション中も表示するならUpdateでこれをよぶようにする）
-    private void SetTwoPointSpringSelectedViewPosition() {
-        
-    }
-    private void SetAreaSpringSelectedVisibleViewPosition() {
+    private void SetAreaSpringMesh() {
         for (int i = 0; i < AreaGameObjects.Length; i++) {
             Mesh tmpMesh = new Mesh();
             if (i % 2 == 0) {
@@ -193,7 +162,7 @@ public class SelectedViewer : MonoBehaviour {
 			AreaGameObjects[i].GetComponent<MeshFilter>().mesh.RecalculateBounds();
 		}
 	}
-    private void SetHingeStencilSpringSelectedVisiblePosition() {
+    private void UpdateHingeStencilSpringSelectedVisiblePosition() {
         //ヒンジの表示はTriangleSheetのEdgeを利用しているので点が動けばEdgeScript.csのUpdate()内で勝手に座標更新されるので何もしなくていい
     }
 }
