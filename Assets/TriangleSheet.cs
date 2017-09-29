@@ -929,7 +929,7 @@ public class TriangleSheet : MonoBehaviour {
             return;
         }
         if (preset_num == 4) {
-            tryChangeNValue(10);
+            tryChangeNValue(9);
             SurfaceSpring_NaturalDurationArray[39] = 3;
             SurfaceSpring_NaturalDurationArray[40] = 3;
             SurfaceSpring_NaturalDurationArray[41] = 3;
