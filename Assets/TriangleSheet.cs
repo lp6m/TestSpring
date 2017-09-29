@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 //シミュレーションに用いる三角形シート
 public class TriangleSheet : MonoBehaviour {
+	private int preset_num = 0;
     private Main GameManagerMain;
     public GameObject forcePrefab;
     public GameObject VertexSpherePrefab;
@@ -693,5 +694,29 @@ public class TriangleSheet : MonoBehaviour {
         return res;
     }
     #endregion
+
+	public void TogglePreset(){
+		//Presetを設定する
+		int all_preset_num = 1;
+		preset_num++;
+		if (preset_num >= all_preset_num) preset_num = 0; 
+		if (preset_num == 0) {
+			//N=10ですべての面積が自然に
+			if (tryChangeNValue (10) == 10) {
+				N = 10;
+				for (int i = 0; i < Hinge_NaturalDurationAarray.Length; i++) {
+					for (int j = 0; j < Hinge_NaturalDurationAarray [i].Count; j++)
+						Hinge_NaturalDurationAarray [i] [j] = 1;
+				}
+				for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) {
+					SurfaceSpring_NaturalDurationArray [i] = 1;
+				}
+				//再描画する
+				this.SelectedViewer.GetComponent<SelectedViewer>().RedrawSelectedViewer();
+			}
+			return;
+		}
+
+	}
 
 }

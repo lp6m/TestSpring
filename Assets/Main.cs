@@ -229,5 +229,10 @@ public class Main : MonoBehaviour {
     public void OnUndoButtonPressed() {
         ManageSheet.GetComponent<TriangleSheet>().undoSelected();
     }
+
+	//PresetButton
+	public void OnPresetButtonPressed(){
+		ManageSheet.GetComponent<TriangleSheet> ().TogglePreset ();
+	}
     #endregion
 }
