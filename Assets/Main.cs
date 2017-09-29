@@ -232,7 +232,8 @@ public class Main : MonoBehaviour {
 
 	//PresetButton
 	public void OnPresetButtonPressed(){
-		ManageSheet.GetComponent<TriangleSheet> ().TogglePreset ();
+        ManageSheet.GetComponent<TriangleSheet>().GenerateSetPalletString();
+        ManageSheet.GetComponent<TriangleSheet>().TogglePreset();
 	}
     #endregion
 }

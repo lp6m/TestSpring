@@ -110,7 +110,7 @@ public class CameraControlByMouse : MonoBehaviour {
             var oldpos = this.transform.position;
             this.transform.position = this.focusObj.transform.position + post;
             focusToPosition = this.transform.position - this.focusObj.transform.position;
-            if (focusToPosition.magnitude > 700.0 || focusToPosition.magnitude < 10)
+            if (focusToPosition.magnitude > 900.0 || focusToPosition.magnitude < 10)
                 this.transform.position = oldpos;
         }
         return;

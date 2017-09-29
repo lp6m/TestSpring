@@ -69,6 +69,7 @@ public class SelectedViewer : MonoBehaviour {
             HingeGameObjects[hingecnt].GetComponent<EdgeScript>().sphere2 = sheet.Vertices[index1 + sheet.N - 1];
             hingecnt++;
         }
+        RedrawSelectedViewer();
 	}
 	
     //表示するものを切り替える

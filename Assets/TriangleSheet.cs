@@ -415,7 +415,8 @@ public class TriangleSheet : MonoBehaviour {
                 int surfaceindex = GetSurfaceIndex(i, rj_index, rk_index);
                 SurfaceScript ss = Surfaces[surfaceindex].GetComponent<SurfaceScript>();
                 //(S - s0)かける
-                res *= (ss.now_area - ss.natural_area * SurfaceSpring_NaturalDurations[SurfaceSpring_NaturalDurationArray[surfaceindex]]);
+                var tmp = ss.natural_area;// *SurfaceSpring_NaturalDurations[SurfaceSpring_NaturalDurationArray[surfaceindex]];
+                res *= (ss.now_area - ss.natural_area * SurfaceSpring_NaturalDurations[SurfaceSpring_NaturalDurationArray[surfaceindex]]) / tmp;
                 force += res;
             }
             //ForceArrows[i].GetComponent<ForceArrow>().arrowvec = force * SpringConstant;
@@ -696,27 +697,327 @@ public class TriangleSheet : MonoBehaviour {
     #endregion
 
 	public void TogglePreset(){
+        if (issimulating) return;
 		//Presetを設定する
-		int all_preset_num = 1;
+		int all_preset_num = 5;
 		preset_num++;
 		if (preset_num >= all_preset_num) preset_num = 0; 
 		if (preset_num == 0) {
-			//N=10ですべての面積が自然に
-			if (tryChangeNValue (10) == 10) {
-				N = 10;
-				for (int i = 0; i < Hinge_NaturalDurationAarray.Length; i++) {
-					for (int j = 0; j < Hinge_NaturalDurationAarray [i].Count; j++)
-						Hinge_NaturalDurationAarray [i] [j] = 1;
-				}
-				for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) {
-					SurfaceSpring_NaturalDurationArray [i] = 1;
-				}
-				//再描画する
-				this.SelectedViewer.GetComponent<SelectedViewer>().RedrawSelectedViewer();
+			//Nそのままですべての面積が自然に
+            tryChangeNValue(N);
+            int default_hinge_naturalduration_index = -1;
+            for (int i = 0; i < Hinge_NaturalDurations.Length; i++) if (Hinge_NaturalDurations[i] == 0) default_hinge_naturalduration_index = i;
+            int default_surface_naturalduration_index = -1; //1.0fになってるインデックスを探す
+            for (int i = 0; i < SurfaceSpring_NaturalDurations.Length; i++) if (SurfaceSpring_NaturalDurations[i] == 1.0f) default_surface_naturalduration_index = i;
+			for (int i = 0; i < Hinge_NaturalDurationAarray.Length; i++) {
+				for (int j = 0; j < Hinge_NaturalDurationAarray [i].Count; j++)
+                    Hinge_NaturalDurationAarray[i][j] = default_hinge_naturalduration_index;
+			}
+			for (int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++) {
+                SurfaceSpring_NaturalDurationArray[i] = default_surface_naturalduration_index;
 			}
 			return;
 		}
-
+        if (preset_num == 1) {
+            tryChangeNValue(9);
+            SurfaceSpring_NaturalDurationArray[39] = 2;
+            SurfaceSpring_NaturalDurationArray[40] = 2;
+            SurfaceSpring_NaturalDurationArray[41] = 2;
+            SurfaceSpring_NaturalDurationArray[42] = 2;
+            SurfaceSpring_NaturalDurationArray[43] = 2;
+            SurfaceSpring_NaturalDurationArray[53] = 2;
+            SurfaceSpring_NaturalDurationArray[54] = 2;
+            SurfaceSpring_NaturalDurationArray[58] = 2;
+            SurfaceSpring_NaturalDurationArray[59] = 2;
+            SurfaceSpring_NaturalDurationArray[68] = 2;
+            SurfaceSpring_NaturalDurationArray[69] = 2;
+            SurfaceSpring_NaturalDurationArray[73] = 2;
+            SurfaceSpring_NaturalDurationArray[74] = 2;
+            SurfaceSpring_NaturalDurationArray[84] = 2;
+            SurfaceSpring_NaturalDurationArray[85] = 2;
+            SurfaceSpring_NaturalDurationArray[86] = 2;
+            SurfaceSpring_NaturalDurationArray[87] = 2;
+            SurfaceSpring_NaturalDurationArray[88] = 2;
+            Hinge_NaturalDurationAarray[0][12] = 4;
+            Hinge_NaturalDurationAarray[0][13] = 4;
+            Hinge_NaturalDurationAarray[0][20] = 4;
+            Hinge_NaturalDurationAarray[0][35] = 4;
+            Hinge_NaturalDurationAarray[0][42] = 4;
+            Hinge_NaturalDurationAarray[0][43] = 4;
+            Hinge_NaturalDurationAarray[1][19] = 4;
+            Hinge_NaturalDurationAarray[1][25] = 4;
+            Hinge_NaturalDurationAarray[1][26] = 4;
+            Hinge_NaturalDurationAarray[1][29] = 4;
+            Hinge_NaturalDurationAarray[1][30] = 4;
+            Hinge_NaturalDurationAarray[1][36] = 4;
+            Hinge_NaturalDurationAarray[2][19] = 4;
+            Hinge_NaturalDurationAarray[2][26] = 4;
+            Hinge_NaturalDurationAarray[2][27] = 4;
+            Hinge_NaturalDurationAarray[2][36] = 4;
+            Hinge_NaturalDurationAarray[2][37] = 4;
+            Hinge_NaturalDurationAarray[2][44] = 4;
+            return;
+        }
+        if (preset_num == 2) {
+            tryChangeNValue(13);
+            SurfaceSpring_NaturalDurationArray[59] = 2;
+            SurfaceSpring_NaturalDurationArray[60] = 2;
+            SurfaceSpring_NaturalDurationArray[61] = 2;
+            SurfaceSpring_NaturalDurationArray[62] = 2;
+            SurfaceSpring_NaturalDurationArray[63] = 2;
+            SurfaceSpring_NaturalDurationArray[64] = 2;
+            SurfaceSpring_NaturalDurationArray[65] = 2;
+            SurfaceSpring_NaturalDurationArray[66] = 2;
+            SurfaceSpring_NaturalDurationArray[67] = 2;
+            SurfaceSpring_NaturalDurationArray[81] = 2;
+            SurfaceSpring_NaturalDurationArray[82] = 2;
+            SurfaceSpring_NaturalDurationArray[83] = 2;
+            SurfaceSpring_NaturalDurationArray[84] = 2;
+            SurfaceSpring_NaturalDurationArray[85] = 2;
+            SurfaceSpring_NaturalDurationArray[86] = 2;
+            SurfaceSpring_NaturalDurationArray[87] = 2;
+            SurfaceSpring_NaturalDurationArray[88] = 2;
+            SurfaceSpring_NaturalDurationArray[89] = 2;
+            SurfaceSpring_NaturalDurationArray[90] = 2;
+            SurfaceSpring_NaturalDurationArray[91] = 2;
+            SurfaceSpring_NaturalDurationArray[103] = 2;
+            SurfaceSpring_NaturalDurationArray[104] = 2;
+            SurfaceSpring_NaturalDurationArray[105] = 2;
+            SurfaceSpring_NaturalDurationArray[106] = 2;
+            SurfaceSpring_NaturalDurationArray[112] = 2;
+            SurfaceSpring_NaturalDurationArray[113] = 2;
+            SurfaceSpring_NaturalDurationArray[114] = 2;
+            SurfaceSpring_NaturalDurationArray[115] = 2;
+            SurfaceSpring_NaturalDurationArray[125] = 2;
+            SurfaceSpring_NaturalDurationArray[126] = 2;
+            SurfaceSpring_NaturalDurationArray[127] = 2;
+            SurfaceSpring_NaturalDurationArray[128] = 2;
+            SurfaceSpring_NaturalDurationArray[136] = 2;
+            SurfaceSpring_NaturalDurationArray[137] = 2;
+            SurfaceSpring_NaturalDurationArray[138] = 2;
+            SurfaceSpring_NaturalDurationArray[139] = 2;
+            SurfaceSpring_NaturalDurationArray[148] = 2;
+            SurfaceSpring_NaturalDurationArray[149] = 2;
+            SurfaceSpring_NaturalDurationArray[150] = 2;
+            SurfaceSpring_NaturalDurationArray[151] = 2;
+            SurfaceSpring_NaturalDurationArray[159] = 2;
+            SurfaceSpring_NaturalDurationArray[160] = 2;
+            SurfaceSpring_NaturalDurationArray[161] = 2;
+            SurfaceSpring_NaturalDurationArray[162] = 2;
+            SurfaceSpring_NaturalDurationArray[172] = 2;
+            SurfaceSpring_NaturalDurationArray[173] = 2;
+            SurfaceSpring_NaturalDurationArray[174] = 2;
+            SurfaceSpring_NaturalDurationArray[175] = 2;
+            SurfaceSpring_NaturalDurationArray[181] = 2;
+            SurfaceSpring_NaturalDurationArray[182] = 2;
+            SurfaceSpring_NaturalDurationArray[183] = 2;
+            SurfaceSpring_NaturalDurationArray[184] = 2;
+            SurfaceSpring_NaturalDurationArray[196] = 2;
+            SurfaceSpring_NaturalDurationArray[197] = 2;
+            SurfaceSpring_NaturalDurationArray[198] = 2;
+            SurfaceSpring_NaturalDurationArray[199] = 2;
+            SurfaceSpring_NaturalDurationArray[200] = 2;
+            SurfaceSpring_NaturalDurationArray[201] = 2;
+            SurfaceSpring_NaturalDurationArray[202] = 2;
+            SurfaceSpring_NaturalDurationArray[203] = 2;
+            SurfaceSpring_NaturalDurationArray[204] = 2;
+            SurfaceSpring_NaturalDurationArray[205] = 2;
+            SurfaceSpring_NaturalDurationArray[206] = 2;
+            SurfaceSpring_NaturalDurationArray[220] = 2;
+            SurfaceSpring_NaturalDurationArray[221] = 2;
+            SurfaceSpring_NaturalDurationArray[222] = 2;
+            SurfaceSpring_NaturalDurationArray[223] = 2;
+            SurfaceSpring_NaturalDurationArray[224] = 2;
+            SurfaceSpring_NaturalDurationArray[225] = 2;
+            SurfaceSpring_NaturalDurationArray[226] = 2;
+            SurfaceSpring_NaturalDurationArray[227] = 2;
+            SurfaceSpring_NaturalDurationArray[228] = 2;
+            Hinge_NaturalDurationAarray[0][18] = 4;
+            Hinge_NaturalDurationAarray[0][19] = 4;
+            Hinge_NaturalDurationAarray[0][20] = 4;
+            Hinge_NaturalDurationAarray[0][21] = 4;
+            Hinge_NaturalDurationAarray[0][42] = 4;
+            Hinge_NaturalDurationAarray[0][43] = 4;
+            Hinge_NaturalDurationAarray[0][88] = 4;
+            Hinge_NaturalDurationAarray[0][89] = 4;
+            Hinge_NaturalDurationAarray[0][110] = 4;
+            Hinge_NaturalDurationAarray[0][111] = 4;
+            Hinge_NaturalDurationAarray[0][112] = 4;
+            Hinge_NaturalDurationAarray[0][113] = 4;
+            Hinge_NaturalDurationAarray[1][31] = 4;
+            Hinge_NaturalDurationAarray[1][42] = 4;
+            Hinge_NaturalDurationAarray[1][51] = 4;
+            Hinge_NaturalDurationAarray[1][53] = 4;
+            Hinge_NaturalDurationAarray[1][62] = 4;
+            Hinge_NaturalDurationAarray[1][64] = 4;
+            Hinge_NaturalDurationAarray[1][67] = 4;
+            Hinge_NaturalDurationAarray[1][69] = 4;
+            Hinge_NaturalDurationAarray[1][78] = 4;
+            Hinge_NaturalDurationAarray[1][80] = 4;
+            Hinge_NaturalDurationAarray[1][89] = 4;
+            Hinge_NaturalDurationAarray[1][100] = 4;
+            Hinge_NaturalDurationAarray[2][29] = 4;
+            Hinge_NaturalDurationAarray[2][40] = 4;
+            Hinge_NaturalDurationAarray[2][51] = 4;
+            Hinge_NaturalDurationAarray[2][53] = 4;
+            Hinge_NaturalDurationAarray[2][62] = 4;
+            Hinge_NaturalDurationAarray[2][64] = 4;
+            Hinge_NaturalDurationAarray[2][79] = 4;
+            Hinge_NaturalDurationAarray[2][81] = 4;
+            Hinge_NaturalDurationAarray[2][90] = 4;
+            Hinge_NaturalDurationAarray[2][92] = 4;
+            Hinge_NaturalDurationAarray[2][103] = 4;
+            Hinge_NaturalDurationAarray[2][114] = 4;
+            return;
+        }
+        if (preset_num == 3) {
+            tryChangeNValue(9);
+            SurfaceSpring_NaturalDurationArray[39] = 3;
+            SurfaceSpring_NaturalDurationArray[40] = 3;
+            SurfaceSpring_NaturalDurationArray[41] = 3;
+            SurfaceSpring_NaturalDurationArray[42] = 3;
+            SurfaceSpring_NaturalDurationArray[43] = 3;
+            SurfaceSpring_NaturalDurationArray[53] = 3;
+            SurfaceSpring_NaturalDurationArray[54] = 3;
+            SurfaceSpring_NaturalDurationArray[55] = 3;
+            SurfaceSpring_NaturalDurationArray[56] = 3;
+            SurfaceSpring_NaturalDurationArray[57] = 3;
+            SurfaceSpring_NaturalDurationArray[58] = 3;
+            SurfaceSpring_NaturalDurationArray[59] = 3;
+            SurfaceSpring_NaturalDurationArray[68] = 3;
+            SurfaceSpring_NaturalDurationArray[69] = 3;
+            SurfaceSpring_NaturalDurationArray[70] = 3;
+            SurfaceSpring_NaturalDurationArray[71] = 3;
+            SurfaceSpring_NaturalDurationArray[72] = 3;
+            SurfaceSpring_NaturalDurationArray[73] = 3;
+            SurfaceSpring_NaturalDurationArray[74] = 3;
+            SurfaceSpring_NaturalDurationArray[84] = 3;
+            SurfaceSpring_NaturalDurationArray[85] = 3;
+            SurfaceSpring_NaturalDurationArray[86] = 3;
+            SurfaceSpring_NaturalDurationArray[87] = 3;
+            SurfaceSpring_NaturalDurationArray[88] = 3;
+            Hinge_NaturalDurationAarray[0][19] = 5;
+            Hinge_NaturalDurationAarray[0][20] = 5;
+            Hinge_NaturalDurationAarray[0][21] = 5;
+            Hinge_NaturalDurationAarray[0][26] = 5;
+            Hinge_NaturalDurationAarray[0][27] = 5;
+            Hinge_NaturalDurationAarray[0][28] = 5;
+            Hinge_NaturalDurationAarray[0][29] = 5;
+            Hinge_NaturalDurationAarray[0][34] = 5;
+            Hinge_NaturalDurationAarray[0][35] = 5;
+            Hinge_NaturalDurationAarray[0][36] = 5;
+            Hinge_NaturalDurationAarray[1][17] = 5;
+            Hinge_NaturalDurationAarray[1][18] = 5;
+            Hinge_NaturalDurationAarray[1][23] = 5;
+            Hinge_NaturalDurationAarray[1][24] = 5;
+            Hinge_NaturalDurationAarray[1][25] = 5;
+            Hinge_NaturalDurationAarray[1][30] = 5;
+            Hinge_NaturalDurationAarray[1][31] = 5;
+            Hinge_NaturalDurationAarray[1][32] = 5;
+            Hinge_NaturalDurationAarray[1][37] = 5;
+            Hinge_NaturalDurationAarray[1][38] = 5;
+            Hinge_NaturalDurationAarray[2][20] = 5;
+            Hinge_NaturalDurationAarray[2][21] = 5;
+            Hinge_NaturalDurationAarray[2][27] = 5;
+            Hinge_NaturalDurationAarray[2][28] = 5;
+            Hinge_NaturalDurationAarray[2][29] = 5;
+            Hinge_NaturalDurationAarray[2][34] = 5;
+            Hinge_NaturalDurationAarray[2][35] = 5;
+            Hinge_NaturalDurationAarray[2][36] = 5;
+            Hinge_NaturalDurationAarray[2][42] = 5;
+            Hinge_NaturalDurationAarray[2][43] = 5;
+            return;
+        }
+        if (preset_num == 4) {
+            tryChangeNValue(10);
+            SurfaceSpring_NaturalDurationArray[39] = 3;
+            SurfaceSpring_NaturalDurationArray[40] = 3;
+            SurfaceSpring_NaturalDurationArray[41] = 3;
+            SurfaceSpring_NaturalDurationArray[42] = 3;
+            SurfaceSpring_NaturalDurationArray[43] = 3;
+            SurfaceSpring_NaturalDurationArray[53] = 3;
+            SurfaceSpring_NaturalDurationArray[54] = 3;
+            SurfaceSpring_NaturalDurationArray[55] = 3;
+            SurfaceSpring_NaturalDurationArray[56] = 3;
+            SurfaceSpring_NaturalDurationArray[57] = 3;
+            SurfaceSpring_NaturalDurationArray[58] = 3;
+            SurfaceSpring_NaturalDurationArray[59] = 3;
+            SurfaceSpring_NaturalDurationArray[68] = 3;
+            SurfaceSpring_NaturalDurationArray[69] = 3;
+            SurfaceSpring_NaturalDurationArray[70] = 3;
+            SurfaceSpring_NaturalDurationArray[71] = 3;
+            SurfaceSpring_NaturalDurationArray[72] = 3;
+            SurfaceSpring_NaturalDurationArray[73] = 3;
+            SurfaceSpring_NaturalDurationArray[74] = 3;
+            SurfaceSpring_NaturalDurationArray[84] = 3;
+            SurfaceSpring_NaturalDurationArray[85] = 3;
+            SurfaceSpring_NaturalDurationArray[86] = 3;
+            SurfaceSpring_NaturalDurationArray[87] = 3;
+            SurfaceSpring_NaturalDurationArray[88] = 3;
+            Hinge_NaturalDurationAarray[0][12] = 4;
+            Hinge_NaturalDurationAarray[0][13] = 4;
+            Hinge_NaturalDurationAarray[0][42] = 4;
+            Hinge_NaturalDurationAarray[0][43] = 4;
+            Hinge_NaturalDurationAarray[1][19] = 4;
+            Hinge_NaturalDurationAarray[1][26] = 4;
+            Hinge_NaturalDurationAarray[1][29] = 4;
+            Hinge_NaturalDurationAarray[1][36] = 4;
+            Hinge_NaturalDurationAarray[2][19] = 4;
+            Hinge_NaturalDurationAarray[2][26] = 4;
+            Hinge_NaturalDurationAarray[2][37] = 4;
+            Hinge_NaturalDurationAarray[2][44] = 4;
+            return;
+        }
 	}
+
+    public string GenerateSetPalletString(){
+        string rst = "";
+        int default_hinge_naturalduration_index = -1;
+        for (int i = 0; i < Hinge_NaturalDurations.Length; i++) if (Hinge_NaturalDurations[i] == 0) default_hinge_naturalduration_index = i;
+        int default_surface_naturalduration_index = -1; //1.0fになってるインデックスを探す
+        for (int i = 0; i < SurfaceSpring_NaturalDurations.Length; i++) if (SurfaceSpring_NaturalDurations[i] == 1.0f) default_surface_naturalduration_index = i;
+			
+        List<int> surfaceIndexList = new List<int>();
+        List<int> surfaceDurationList = new List<int>();
+        for(int i = 0; i < SurfaceSpring_NaturalDurationArray.Length; i++){
+            var duration = SurfaceSpring_NaturalDurationArray[i];
+            if (duration != default_surface_naturalduration_index) {
+                surfaceIndexList.Add(i);
+                surfaceDurationList.Add(duration);
+                rst += "SurfaceSpring_NaturalDurationArray[" + i.ToString() + "] = " + duration.ToString() + ";\n";
+            }
+        }
+        List<int> hingeIndexList1 = new List<int>();
+        List<int> hingeIndexList2 = new List<int>();
+        List<int> hingeIndexList3 = new List<int>();
+        List<int> hingeDurationList1 = new List<int>();
+        List<int> hingeDurationList2 = new List<int>();
+        List<int> hingeDurationList3 = new List<int>();
+        for (int i = 0; i < Hinge_NaturalDurationAarray[0].Count; i++) {
+            var duration = Hinge_NaturalDurationAarray[0][i];
+            if (duration != default_hinge_naturalduration_index) {
+                hingeIndexList1.Add(i);
+                hingeDurationList1.Add(duration);
+                rst += "Hinge_NaturalDurationAarray[0][" + i.ToString() + "] = " + duration.ToString() + ";\n";
+            }
+        }
+        for (int i = 0; i < Hinge_NaturalDurationAarray[1].Count; i++) {
+            var duration = Hinge_NaturalDurationAarray[1][i];
+            if (duration != default_hinge_naturalduration_index) {
+                hingeIndexList2.Add(i);
+                hingeDurationList2.Add(duration);
+                rst += "Hinge_NaturalDurationAarray[1][" + i.ToString() + "] = " + duration.ToString() + ";\n";
+            }
+        }
+        for (int i = 0; i < Hinge_NaturalDurationAarray[2].Count; i++) {
+            var duration = Hinge_NaturalDurationAarray[2][i];
+            if (duration != default_hinge_naturalduration_index) {
+                hingeIndexList3.Add(i);
+                hingeDurationList3.Add(duration);
+                rst += "Hinge_NaturalDurationAarray[2][" + i.ToString() + "] = " + duration.ToString() + ";\n";
+            }
+        }
+        return rst;
+    }
 
 }
