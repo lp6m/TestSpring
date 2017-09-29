@@ -214,6 +214,9 @@ public class TriangleSheet : MonoBehaviour {
         SelectedViewer.GetComponent<SelectedViewer>().sheet = this;
 
         #endregion
+		//ペイントのスタックを初期化
+		old_SurfaceSpring_NaturalDurationArrayList = new List<int[]>();
+		old_Hinge_NaturalDurationArrayList = new List<List<int>[]>();
     }
     public void StartSimulate() {
         issimulating = true;
@@ -555,8 +558,9 @@ public class TriangleSheet : MonoBehaviour {
             if (vertindex[0] > N * N) {
                 for (int i = 0; i < 3; i++) vertindex[i] -= N * N;
             }
-            addOldDurationArray();
             int surfaceindex = GetSurfaceIndex(vertindex[0], vertindex[1], vertindex[2]);
+			//前状態と新しい状態が同じときは現在の状態をスタックいいれない
+			if(SurfaceSpring_NaturalDurationArray[surfaceindex] != GameManagerMain.pallet.index) addOldDurationArray();
             //パレットで選択した自然長にする
             SurfaceSpring_NaturalDurationArray[surfaceindex] = GameManagerMain.pallet.index;
             this.SelectedViewer.GetComponent<SelectedViewer>().changeAreaMaterial(surfaceindex);
@@ -639,7 +643,6 @@ public class TriangleSheet : MonoBehaviour {
     List<int[]> old_SurfaceSpring_NaturalDurationArrayList = new List<int[]>();
     List<List<int>[]> old_Hinge_NaturalDurationArrayList = new List<List<int>[]>();
     void addOldDurationArray() {
-        //前と全く同じなら追加しない
         pushSurfaceSpring_NaturalDurationArrayList(this.SurfaceSpring_NaturalDurationArray);
         pushHinge_NaturalDurationArrayList(this.Hinge_NaturalDurationAarray);
     }
@@ -654,26 +657,38 @@ public class TriangleSheet : MonoBehaviour {
     }
     const int max_undo_num = 10;
     void pushSurfaceSpring_NaturalDurationArrayList(int[] durationArray) {
-        old_SurfaceSpring_NaturalDurationArrayList.Add(durationArray.Clone() as int[]);
+		int[] clone = new int[durationArray.Length];
+		//durationArray.CopyTo (clone, 0);
+		int num = 0;
+		foreach (var t in durationArray) clone [num++] = t;
+        old_SurfaceSpring_NaturalDurationArrayList.Add(clone);
         if (old_SurfaceSpring_NaturalDurationArrayList.Count > max_undo_num) {
             old_SurfaceSpring_NaturalDurationArrayList.RemoveAt(0);
         }
     }
     void pushHinge_NaturalDurationArrayList(List<int>[] durationArray) {
-        old_Hinge_NaturalDurationArrayList.Add(durationArray.Clone() as List<int>[]);
+		List<int>[] clone = new List<int>[durationArray.Length];
+		//durationArray.CopyTo (clone, 0);
+		int num = 0;
+		foreach (var list in durationArray) {
+			List<int> tmpList = new List<int> ();
+			foreach (var t in list) tmpList.Add (t);
+			clone [num++] = tmpList;
+		}
+        old_Hinge_NaturalDurationArrayList.Add(clone);
         if (old_Hinge_NaturalDurationArrayList.Count > max_undo_num) {
             old_Hinge_NaturalDurationArrayList.RemoveAt(0);
         }
     }
     int[] popSurfaceSpring_NaturalDurationArrayList() {
         int num = old_SurfaceSpring_NaturalDurationArrayList.Count;
-        var res = old_SurfaceSpring_NaturalDurationArrayList[num - 1].Clone() as int[];
+        var res = old_SurfaceSpring_NaturalDurationArrayList[num - 1];
         old_SurfaceSpring_NaturalDurationArrayList.RemoveAt(num - 1);
         return res;
     }
     List<int>[] popHinge_NaturalDurationAarrayList() {
         int num = old_Hinge_NaturalDurationArrayList.Count;
-        var res = old_Hinge_NaturalDurationArrayList[num - 1].Clone() as List<int>[];
+        var res = old_Hinge_NaturalDurationArrayList[num - 1];
         old_Hinge_NaturalDurationArrayList.RemoveAt(num - 1);
         return res;
     }
