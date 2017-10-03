@@ -15,6 +15,7 @@ public class Main : MonoBehaviour {
 	public Text CamMoveOrPaintToggleText;
     public GameObject SettingsPanel;
     public GameObject PaintPanel;
+	public GameObject TutorialPanel;
     public Sprite StartSprite;
     public Sprite StopSprite;
     #endregion
@@ -234,6 +235,13 @@ public class Main : MonoBehaviour {
 	public void OnPresetButtonPressed(){
         ManageSheet.GetComponent<TriangleSheet>().GenerateSetPalletString();
         ManageSheet.GetComponent<TriangleSheet>().TogglePreset();
+	}
+
+	public void OnTutorialButtonPressed(){
+		TutorialPanel.SetActive (true);
+	}
+	public void CloseTutorialButtonPressed(){
+		TutorialPanel.SetActive (false);
 	}
     #endregion
 }
